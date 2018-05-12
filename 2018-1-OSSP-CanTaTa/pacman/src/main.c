@@ -193,7 +193,7 @@ static void process_events(void)
 }
 
 static void key_down_hacks(int keycode)
-{
+{// #8 Kim : 1.
 	if (keycode == SDLK_RETURN) pacmanGame.currentLevel++;
 	if (keycode == SDLK_BACKSPACE) menuSystem.ticksSinceModeChange = SDL_GetTicks();
 
@@ -203,12 +203,12 @@ static void key_down_hacks(int keycode)
 	if (keycode == SDLK_SPACE) fps_sethz((rateSwitch = !rateSwitch) ? 200 : 60);
 
 	if (keycode == SDLK_b) {
-		if(!pacmanGame.pacman.boostOn) {
-			pacmanGame.pacman.body.velocity = 100;
-			pacmanGame.pacman.boostOn = true;
+		if(!pacmanGame.pacman[0].boostOn) {
+			pacmanGame.pacman[0].body.velocity = 100;
+			pacmanGame.pacman[0].boostOn = true;
 		} else {
-			pacmanGame.pacman.body.velocity = 80;
-			pacmanGame.pacman.boostOn = false;
+			pacmanGame.pacman[0].body.velocity = 80;
+			pacmanGame.pacman[0].boostOn = false;
 		}
 	}
 
