@@ -6,8 +6,7 @@
 #include "pacman.h"
 #include "pellet.h"
 
-typedef enum
-{
+typedef enum {
 	GameBeginState,
 	LevelBeginState,
 	GamePlayState,
@@ -21,18 +20,17 @@ typedef enum
 //what causes you to transition from state A -> state B
 
 //elevator stationary
-	//action: do nothing
-	//transition
-		//-> moving up (someone presses a button upstairs)
-		//-> moving down (someone presses a button downstairs)
-		//-> door opening (someone presses button on current level)
-		//-> go down/ up (timeout on a specific level)
+//action: do nothing
+//transition
+//-> moving up (someone presses a button upstairs)
+//-> moving down (someone presses a button downstairs)
+//-> door opening (someone presses button on current level)
+//-> go down/ up (timeout on a specific level)
 
-typedef struct
-{
+typedef struct {
 	GameState gameState;
 	unsigned int ticksSinceModeChange;
-	Pacman pacman;
+	Pacman pacman[2]; // #8 Kim : 1.플레이어수 늘려주기 위해서 배열로 바꿈  Pacman pacman -> pacman[2];
 	Ghost ghosts[4];
 	Board board;
 	PelletHolder pelletHolder;
