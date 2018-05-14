@@ -5,6 +5,7 @@
 #include "ghost.h"
 #include "pacman.h"
 #include "pellet.h"
+#include "object.h"
 
 typedef enum {
 	GameBeginState,
@@ -35,6 +36,7 @@ typedef struct {
 	Board board;
 	PelletHolder pelletHolder;
 	GameFruit gameFruit1, gameFruit2, gameFruit3, gameFruit4, gameFruit5;
+	GameObject gameObject, gameObject2, gameObject3, gameObject4, gameObject5;
 	int highscore;
 	int currentLevel;
 } PacmanGame;
