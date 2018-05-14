@@ -46,7 +46,7 @@ void reset_object(GameObject *gameObject, Board *board)
 	} while( (is_valid_square(board, randX, randY) || is_tele_square(randX, randY) ) == false);
 
 	gameObject->object = Ghostslow;
-	gameObject->objectMode = NotDisplaying;
+	gameObject->objectMode = NotDisplaying_obj;
 	gameObject->startedAt = 0;
 	gameObject->displayTime = 0;
 
