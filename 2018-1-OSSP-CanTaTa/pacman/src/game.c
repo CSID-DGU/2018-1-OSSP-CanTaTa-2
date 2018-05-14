@@ -19,6 +19,7 @@ static void process_player(PacmanGame *game);
 static void process_fruit(PacmanGame *game);
 static void process_ghosts(PacmanGame *game);
 static void process_pellets(PacmanGame *game);
+static void process_object(PacmanGame *game); //Yang #5 object
 
 static bool check_pacghost_collision(PacmanGame *game);     //return true if pacman collided with any ghosts
 static void enter_state(PacmanGame *game, GameState state); //transitions to/ from a state
@@ -45,6 +46,7 @@ void game_tick(PacmanGame *game)
 
 			process_fruit(game);
 			process_pellets(game);
+			process_object(game);
 
 			if (game->pacman[0].score > game->highscore) game->highscore = game->pacman[0].score;// #8 Kim : 1.
 
@@ -292,7 +294,7 @@ static void enter_state(PacmanGame *game, GameState state)
 
 			break;
 		case LevelBeginState:
-			
+
 			break;
 		case GamePlayState:
 			break;
@@ -587,6 +589,58 @@ static void process_fruit(PacmanGame *game)// player_index 해야할듯?
 
 }
 
+//#5 Yang : 프로세스 오브젝트 함수 추가
+static void process_object(PacmanGame *game)
+{
+	int pelletsEaten = game->pelletHolder.totalNum - game->pelletHolder.numLeft;
+
+	GameObject *o1 = &game->gameObject1;
+	GameObject *o2 = &game->gameObject2;
+	GameObject *o3 = &game->gameObject3;
+
+	int curLvl = game->currentLevel;
+
+	if (pelletsEaten >= 50 && o1->objectMode == NotDisplaying_obj)
+	{
+		o1->objectMode = Displaying_obj;
+		regen_object(o1, curLvl);
+	}
+	else if (pelletsEaten >= 100 && o2->objectMode == NotDisplaying_obj)
+	{
+		o2->objectMode = Displaying_obj;
+		regen_object(o2, curLvl);
+	}
+	else if (pelletsEaten >= 150 && o3->objectMode == NotDisplaying_obj)
+	{
+		o3->objectMode = Displaying_obj;
+		regen_object(o3, curLvl);
+	}
+	unsigned int o1dt = ticks_game() - o1->startedAt;
+	unsigned int o2dt = ticks_game() - o2->startedAt;
+	unsigned int o3dt = ticks_game() - o3->startedAt;
+
+	Pacman *pac = &game->pacman[0];
+
+	if (o1->objectMode == Displaying_obj)
+	{
+		if (o1dt > o1->displayTime) o1->objectMode = Displayed_obj;
+	}
+	if (o2->objectMode == Displaying_obj)
+	{
+		if (o2dt > o2->displayTime) o2->objectMode = Displayed_obj;
+	}if (o3->objectMode == Displaying_obj)
+	{
+		if (o3dt > o3->displayTime) o3->objectMode = Displayed_obj;
+	}
+
+	if (o1->objectMode == Displaying_obj && collides_obj(&pac->body, o1->x, o1->y))
+	{
+		o1->objectMode = Displayed_obj;
+		o1->eaten = true;
+		o1->eatenAt = ticks_game();
+	}
+
+}
 static void process_pellets(PacmanGame *game)
 {
 	int j = 0;
