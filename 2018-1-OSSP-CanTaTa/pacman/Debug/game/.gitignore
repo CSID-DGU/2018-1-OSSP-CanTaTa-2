@@ -1,2 +1,3 @@
 *.c.o
 /src!animation.c.o
+*.c.d

@@ -76,10 +76,21 @@ static void main_loop(void)
 
 static void internal_tick(void)
 {
+	int up_down = 0;
 	switch (state)
 	{
-		case Menu:
-			menu_tick(&menuSystem);
+		case Menu:// #8 Kim : 2.
+
+			up_down = menu_tick(&menuSystem);
+
+			if(pacmanGame.playMode==0 && up_down ==-1)
+				pacmanGame.playMode=Single;
+			else if (pacmanGame.playMode==2&&up_down==1)
+				pacmanGame.playMode = 2;
+			else
+			{
+				pacmanGame.playMode+=up_down;
+			}
 
 			if (menuSystem.action == GoToGame)
 			{
@@ -95,6 +106,7 @@ static void internal_tick(void)
 			{
 				menu_init(&menuSystem);
 				state = Menu;
+				pacmanGame.playMode = Single;
 			}
 
 			break;

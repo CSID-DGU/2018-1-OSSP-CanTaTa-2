@@ -15,7 +15,7 @@ typedef struct
 } MenuSystem;
 
 //Performs a single tick on the menu system.
-void menu_tick(MenuSystem *menuSystem);
+int menu_tick(MenuSystem *menuSystem);
 
 //Renders the menu system in its current state.
 void menu_render(MenuSystem *menuSystem);

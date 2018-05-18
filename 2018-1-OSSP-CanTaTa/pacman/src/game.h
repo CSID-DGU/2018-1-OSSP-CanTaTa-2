@@ -5,6 +5,7 @@
 #include "ghost.h"
 #include "pacman.h"
 #include "pellet.h"
+#include "object.h"
 
 typedef enum {
 	GameBeginState,
@@ -26,7 +27,11 @@ typedef enum {
 //-> moving down (someone presses a button downstairs)
 //-> door opening (someone presses button on current level)
 //-> go down/ up (timeout on a specific level)
-
+typedef enum{
+	Single,
+	Multi,
+	Online
+}PlayMode;
 typedef struct {
 	GameState gameState;
 	unsigned int ticksSinceModeChange;
@@ -35,8 +40,10 @@ typedef struct {
 	Board board;
 	PelletHolder pelletHolder;
 	GameFruit gameFruit1, gameFruit2, gameFruit3, gameFruit4, gameFruit5;
+	GameObject gameObject, gameObject2, gameObject3, gameObject4, gameObject5;
 	int highscore;
 	int currentLevel;
+	PlayMode playMode;
 } PacmanGame;
 
 //Updates the game 1 tick, or 1/60th of a second.

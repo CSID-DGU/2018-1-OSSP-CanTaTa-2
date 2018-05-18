@@ -18,7 +18,7 @@
 static void process_player(PacmanGame *game,int player_num);// #8 Kim 2. player num 추가
 static void process_fruit(PacmanGame *game);
 static void process_ghosts(PacmanGame *game);
-static void process_pellets(PacmanGame *game);
+static void process_pellets(PacmanGame *game,int player_num);// #8 Kim 3. player num 추가
 
 static bool check_pacghost_collision(PacmanGame *game);     //return true if pacman collided with any ghosts
 static void enter_state(PacmanGame *game, GameState state); //transitions to/ from a state
@@ -46,7 +46,10 @@ void game_tick(PacmanGame *game)
 			process_ghosts(game);
 
 			process_fruit(game);
-			process_pellets(game);
+
+			//#8 3. collusion pellet check 2개로
+			process_pellets(game,0);
+			process_pellets(game,1);
 
 			if (game->pacman[0].score > game->highscore ) game->highscore = game->pacman[0].score;// #8 Kim : 1.
 			if (game->pacman[1].score > game->highscore ) game->highscore = game->pacman[1].score;// #8 Kim : 2. 만약 p2가 최고점수면 ㅇㅇ
@@ -287,6 +290,7 @@ static void enter_state(PacmanGame *game, GameState state)
 				game->pacman[0].livesLeft--;
 				pacdeath_init(game);
 			}
+			break;
 		default: ; //do nothing
 	}
 
@@ -593,8 +597,8 @@ static void process_fruit(PacmanGame *game)// player_index 해야할듯?
 
 }
 
-static void process_pellets(PacmanGame *game)
-{
+static void process_pellets(PacmanGame *game,int player_num)
+{//#8 Kim 3. 그냥 배열넣는부부에 player_num 추가해줌으로써 이거 두번호출하고 0, 1 한번씩 호출 하게함.
 	int j = 0;
 	//if pacman and pellet collide
 	//give pacman that many points
@@ -609,27 +613,24 @@ static void process_pellets(PacmanGame *game)
 		//skip if we've eaten this one already
 		if (p->eaten) continue;
 
-		if (collides_obj(&game->pacman[0].body, p->x, p->y))
+		if (collides_obj(&game->pacman[player_num].body, p->x, p->y))
 		{
 			holder->numLeft--;
 
 			p->eaten = true;
-			game->pacman[0].score += pellet_points(p);
+			game->pacman[player_num].score += pellet_points(p);
 			if(pellet_check(p)) {
-				game->pacman[0].godMode = true;
-				game->pacman[0].originDt = ticks_game();
+				game->pacman[player_num].godMode = true;
+				game->pacman[player_num].originDt = ticks_game();
 				for(j = 0; j< 4; j++) {
 					if(game->ghosts[j].isDead == 2)
 						game->ghosts[j].isDead = 0;
 				}
 			}
-
 			//play eat sound
-
 			//eating a small pellet makes pacman not move for 1 frame
 			//eating a large pellet makes pacman not move for 3 frames
-			game->pacman[0].missedFrames = pellet_nop_frames(p);
-
+			game->pacman[player_num].missedFrames = pellet_nop_frames(p);
 			//can only ever eat 1 pellet in a frame, so return
 			return;
 		}
