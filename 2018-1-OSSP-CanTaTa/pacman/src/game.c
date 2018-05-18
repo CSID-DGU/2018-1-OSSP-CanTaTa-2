@@ -19,7 +19,7 @@ static void process_player(PacmanGame *game);
 static void process_fruit(PacmanGame *game);
 static void process_ghosts(PacmanGame *game);
 static void process_pellets(PacmanGame *game);
-static void process_object(PacmanGame *game); //Yang #5 object
+static void process_object(PacmanGame *game); //Yang #5: 2. object
 
 static bool check_pacghost_collision(PacmanGame *game);     //return true if pacman collided with any ghosts
 static void enter_state(PacmanGame *game, GameState state); //transitions to/ from a state
@@ -185,6 +185,10 @@ void game_render(PacmanGame *game)
 			if (game->gameFruit4.eaten && ticks_game() - game->gameFruit4.eatenAt < 2000) draw_fruit_pts(&game->gameFruit4);
 			if (game->gameFruit5.eaten && ticks_game() - game->gameFruit5.eatenAt < 2000) draw_fruit_pts(&game->gameFruit5);
 
+			// #5 Yang : 3.object 표시
+			if (game->gameObject1.objectMode == Displaying_obj) draw_object_game(game->currentLevel, &game->gameObject1);
+			if (game->gameObject2.objectMode == Displaying_obj) draw_object_game(game->currentLevel, &game->gameObject2);
+			if (game->gameObject3.objectMode == Displaying_obj) draw_object_game(game->currentLevel, &game->gameObject3);
 			// #8 Kim : 1.
 			draw_pacman(&game->pacman[0]);
 
@@ -283,6 +287,7 @@ static void enter_state(PacmanGame *game, GameState state)
 				game->pacman[0].livesLeft--;
 				pacdeath_init(game);
 			}
+			break;
 		default: ; //do nothing
 	}
 
@@ -746,6 +751,11 @@ void level_init(PacmanGame *game)
 	reset_fruit(&game->gameFruit3, &game->board);
 	reset_fruit(&game->gameFruit4, &game->board);
 	reset_fruit(&game->gameFruit5, &game->board);
+
+	//#5 Yang : 3.object reset
+	reset_object(&game->gameObject1, &game->board);
+	reset_object(&game->gameObject2, &game->board);
+	reset_object(&game->gameObject3, &game->board);
 
 }
 

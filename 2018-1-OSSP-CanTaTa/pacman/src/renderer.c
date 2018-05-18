@@ -245,7 +245,37 @@ void draw_fruit_game(int currentLevel, GameFruit *gameFruit)
 	draw_image_coord_offset(image, gameFruit->x, gameFruit->y + 2, -5, 8);
 }
 
-//
+
+//#5 Yang : 3. object renderering
+void draw_object_indicator(int currentLevel)
+{
+	if (currentLevel < 1)
+		{
+			printf("invalid level number for drawing fruit: %d\naborting\n", currentLevel);
+			exit(1);
+		}
+
+		int x = 26 * 16;
+		int y = 34 * 16;
+
+		int index = currentLevel > 7 ? 7 : currentLevel;
+
+		for (int i = index; i > 0; i--)
+		{
+			Object object = object_for_level(currentLevel - (index - i));
+			SDL_Surface *image = get_object_image(object);
+
+			apply_surface(x - i * 16 * 2, y, image);
+		}
+}
+void draw_object_game(int currentLevel, GameObject *gameObject)
+{
+	Object object = object_for_level(currentLevel);
+		SDL_Surface *image = get_object_image(object);
+
+		//TODO: maybe this offset isn't the same for all fruit. Investigate
+		draw_image_coord_offset(image, gameObject->x, gameObject->y + 2, -5, 8);
+}
 //
 // Pellet renderering
 //
