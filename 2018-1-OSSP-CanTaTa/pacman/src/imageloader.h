@@ -9,6 +9,7 @@
 #include "main.h"
 #include "fruit.h"
 #include "ghost.h"
+#include "object.h"
 
 #define NUM_CHAR_IMAGES 26
 #define NUM_NUM_IMAGES 10
@@ -55,6 +56,9 @@ SDL_Surface** get_num_images(void);
 SDL_Surface** get_spec_images(void);
 
 SDL_Surface* get_fruit_image(Fruit fruit);
+
+//#5 Yang : 3. obeject renderering
+SDL_Surface* get_object_image(Object object);
 
 SDL_Surface* get_ghost_score_image(int i);
 SDL_Surface* get_fruit_score_image(Fruit fruit);

@@ -8,6 +8,7 @@
 #include "pacman.h"
 #include "pellet.h"
 #include "text.h"
+#include "object.h"
 
 //Holds data relating to a single rendered ghost-row.
 typedef struct
@@ -62,6 +63,10 @@ void draw_game_gameover(void);
 void draw_fruit_indicators(int currentLevel);
 void draw_fruit_game(int currentLevel, GameFruit *gameFruit);
 
+
+//#5 Yang : 3. obeject renderering
+void draw_object_indicators(int currentLevel);
+void draw_object_game(int currentLevel, GameObject *gameObject);
 //
 // Pellet renderering
 //
