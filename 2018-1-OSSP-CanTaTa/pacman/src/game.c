@@ -15,10 +15,10 @@
 #include <stdlib.h>
 #include <time.h>
 
-static void process_player(PacmanGame *game);
+static void process_player(PacmanGame *game,int player_num);// #8 Kim 2. player num 추가
 static void process_fruit(PacmanGame *game);
 static void process_ghosts(PacmanGame *game);
-static void process_pellets(PacmanGame *game);
+static void process_pellets(PacmanGame *game,int player_num);// #8 Kim 3. player num 추가
 
 static bool check_pacghost_collision(PacmanGame *game);     //return true if pacman collided with any ghosts
 static void enter_state(PacmanGame *game, GameState state); //transitions to/ from a state
@@ -40,13 +40,19 @@ void game_tick(PacmanGame *game)
 			break;
 		case GamePlayState:
 			// everyone can move and this is the standard 'play' game mode
-			process_player(game);
+			//#8 2. player 두개로 늘림
+			process_player(game,0);
+			process_player(game,1);
 			process_ghosts(game);
 
 			process_fruit(game);
-			process_pellets(game);
 
-			if (game->pacman[0].score > game->highscore) game->highscore = game->pacman[0].score;// #8 Kim : 1.
+			//#8 3. collusion pellet check 2개로
+			process_pellets(game,0);
+			process_pellets(game,1);
+
+			if (game->pacman[0].score > game->highscore ) game->highscore = game->pacman[0].score;// #8 Kim : 1.
+			if (game->pacman[1].score > game->highscore ) game->highscore = game->pacman[1].score;// #8 Kim : 2. 만약 p2가 최고점수면 ㅇㅇ
 
 			break;
 		case WinState:
@@ -162,6 +168,7 @@ void game_render(PacmanGame *game)
 
 			//we also draw pacman and ghosts (they are idle currently though)
 			draw_pacman_static(&game->pacman[0]);// #8 Kim : 1.
+			draw_pacman_static(&game->pacman[1]);// #8 Kim : 2. pacman 2도 그려보자~~
 			for (int i = 0; i < 4; i++) draw_ghost(&game->ghosts[i]);
 
 			draw_large_pellets(&game->pelletHolder, false);
@@ -185,6 +192,8 @@ void game_render(PacmanGame *game)
 
 			// #8 Kim : 1.
 			draw_pacman(&game->pacman[0]);
+			// #8 Kim : 2.
+			draw_pacman(&game->pacman[1]);
 
 			if(game->pacman[0].godMode == false) {
 				for (int i = 0; i < 4; i++) {
@@ -281,6 +290,7 @@ static void enter_state(PacmanGame *game, GameState state)
 				game->pacman[0].livesLeft--;
 				pacdeath_init(game);
 			}
+			break;
 		default: ; //do nothing
 	}
 
@@ -333,9 +343,9 @@ bool can_move(Pacman *pacman, Board *board, Direction dir)
 	return is_valid_square(board, newX, newY) || is_tele_square(newX, newY);
 }
 
-static void process_player(PacmanGame *game) // player index 해야할듯 ?
+static void process_player(PacmanGame *game,int player_num)
 {// #8 Kim : 1.
-	Pacman *pacman = &game->pacman[0];
+	Pacman *pacman = &game->pacman[player_num]; // #8 Kim : 2. 이거로 두개의 플레이어 방향 셋팅
 	Board *board = &game->board;
 
 	if (pacman->missedFrames != 0)
@@ -348,7 +358,7 @@ static void process_player(PacmanGame *game) // player index 해야할듯 ?
 
 	Direction newDir;
 
-	bool dirPressed = dir_pressed_now(&newDir);
+	bool dirPressed = dir_pressed_now(&newDir,player_num);//#8 Kim : 2.플레이어마다 키가 달라짐.
 
 	if (dirPressed)
 	{
@@ -587,8 +597,8 @@ static void process_fruit(PacmanGame *game)// player_index 해야할듯?
 
 }
 
-static void process_pellets(PacmanGame *game)
-{
+static void process_pellets(PacmanGame *game,int player_num)
+{//#8 Kim 3. 그냥 배열넣는부부에 player_num 추가해줌으로써 이거 두번호출하고 0, 1 한번씩 호출 하게함.
 	int j = 0;
 	//if pacman and pellet collide
 	//give pacman that many points
@@ -603,27 +613,24 @@ static void process_pellets(PacmanGame *game)
 		//skip if we've eaten this one already
 		if (p->eaten) continue;
 
-		if (collides_obj(&game->pacman[0].body, p->x, p->y))
+		if (collides_obj(&game->pacman[player_num].body, p->x, p->y))
 		{
 			holder->numLeft--;
 
 			p->eaten = true;
-			game->pacman[0].score += pellet_points(p);
+			game->pacman[player_num].score += pellet_points(p);
 			if(pellet_check(p)) {
-				game->pacman[0].godMode = true;
-				game->pacman[0].originDt = ticks_game();
+				game->pacman[player_num].godMode = true;
+				game->pacman[player_num].originDt = ticks_game();
 				for(j = 0; j< 4; j++) {
 					if(game->ghosts[j].isDead == 2)
 						game->ghosts[j].isDead = 0;
 				}
 			}
-
 			//play eat sound
-
 			//eating a small pellet makes pacman not move for 1 frame
 			//eating a large pellet makes pacman not move for 3 frames
-			game->pacman[0].missedFrames = pellet_nop_frames(p);
-
+			game->pacman[player_num].missedFrames = pellet_nop_frames(p);
 			//can only ever eat 1 pellet in a frame, so return
 			return;
 		}
@@ -665,6 +672,8 @@ void gamestart_init(PacmanGame *game)
 	level_init(game);
 
 	pacman_init(&game->pacman[0]);
+	// #8 Kim : 2. pacman init 부분도 추가
+	pacman_init(&game->pacman[1]);
 	//we need to reset all fruit
 	//fuit_init();
 	game->highscore = 0; //TODO maybe load this in from a file..?
@@ -698,6 +707,7 @@ void level_init(PacmanGame *game)
 void pacdeath_init(PacmanGame *game)
 {
 	pacman_level_init(&game->pacman[0]);
+	pacman_level_init(&game->pacman[1]); //#8 Kim : 2.level도 흠...
 	ghosts_init(game->ghosts);
 
 	reset_fruit(&game->gameFruit1, &game->board);

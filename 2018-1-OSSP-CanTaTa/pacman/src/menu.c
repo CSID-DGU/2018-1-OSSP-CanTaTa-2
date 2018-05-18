@@ -33,15 +33,24 @@ void menu_init(MenuSystem *menuSystem)
 	menuSystem->action = Nothing;
 	menuSystem->ticksSinceModeChange = SDL_GetTicks();
 }
-
-void menu_tick(MenuSystem *menuSystem)
+// #8 Kim : 3. 메뉴 만들기
+// int 반환 하도록 함
+//  메뉴에서  key up하면 -1  ,down 하면 1 . 아무것도 아니면 0
+int menu_tick(MenuSystem *menuSystem)
 {
 	bool startNew = key_held(SDLK_KP_ENTER) || key_held(SDLK_RETURN);
-
 	if (startNew)
 	{
 		menuSystem->action = GoToGame;
+		return 0;
 	}
+
+	if (key_held(SDLK_UP))
+		return -1;
+	else if(key_held(SDLK_DOWN))
+		return 1;
+	else
+		return 0;
 }
 
 void menu_render(MenuSystem *menuSystem)

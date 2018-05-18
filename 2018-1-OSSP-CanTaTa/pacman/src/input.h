@@ -18,13 +18,14 @@ void handle_keyup(int keycode);
 
 //Returns true if the current direction is currently pressed down.
 //A direction can be bound to multiple keypressed, making this function input-method agnostic.
-bool dir_key_held(Direction direction);
+bool dir_key_held(Direction direction,int player_num);// #8 Kim : 2.플레이어에 따라 키 누르는 값이 다름.
 
 //This function sets the input direction to the last direction that was pressed and is still currently pressed.
 //If no direction is pressed, the input direction is not assigned to.
 //If multiple directions were pressed at the same time-instance, this function prioritises Up, Left, Down, Right.
 //It returns true to indicate a direction is currently pressed, and false if no direction is pressed.
-bool dir_pressed_now(Direction *direction);
+
+bool dir_pressed_now(Direction *direction,int player_num);// #8 Kim : 2.플레이어에 따라 키 누르는 값이 다름.
 
 //Tests if a particular key is pressed. Uses the SDLK keycode constants.
 bool key_held(int key);
