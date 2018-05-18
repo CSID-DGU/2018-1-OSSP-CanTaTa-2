@@ -14,6 +14,9 @@
 
 #define FRUIT_DIR "fruit/"
 
+//#5 Yang : 3. object renderering
+#define OBJECT_DIR "object/"
+
 #define ENTITIES_DIR "entities/"
 
 #define GHOST_DIR "ghosts/"
@@ -69,6 +72,8 @@ SDL_Surface *ptsPeachImage;
 SDL_Surface *fruitPoints[NUM_FRUIT];
 SDL_Surface *ghostPoints[4];
 
+//#5 Yang : 3. obeject renderering
+SDL_Surface *objectPoints[NUM_OBJECT];
 //
 //pacman sprites
 //
@@ -109,12 +114,19 @@ SDL_Surface *galaxianImage;
 SDL_Surface *bellImage;
 SDL_Surface *keyImage;
 
+
+//#5 Yang : 3. object renderering
+//object images
+SDL_Surface *ghostslowImage;
+
+
 void load_board_images(void);
 void load_pacman_images(void);
 void load_ghost_images(void);
 void load_misc_images(void);
 void load_char_images(void);
 void load_fruit_images(void);
+void load_object_images(void);
 
 void dispose_board_images(void);
 void dispose_pacman_images(void);
@@ -122,6 +134,7 @@ void dispose_ghost_images(void);
 void dispose_misc_images(void);
 void dispose_char_images(void);
 void dispose_fruit_images(void);
+void dispose_object_images(void);
 
 void load_images(void)
 {
@@ -131,6 +144,7 @@ void load_images(void)
 	load_misc_images();
 	load_char_images();
 	load_fruit_images();
+	load_object_images();
 }
 
 void dispose_images(void)
@@ -140,6 +154,7 @@ void dispose_images(void)
 	dispose_misc_images();
 	dispose_char_images();
 	dispose_fruit_images();
+	dispose_object_images();
 }
 
 void load_diags(SDL_Surface *images[4], const char *file)
@@ -377,6 +392,15 @@ void dispose_fruit_images(void)
 	SDL_FreeSurface(galaxianImage);
 	SDL_FreeSurface(bellImage);
 	SDL_FreeSurface(keyImage);
+}
+//#5 Yang : 3. object renderering
+void load_object_images(void)
+{
+	ghostslowImage = load_image(DIR OBJECT_DIR "ghostslow.png");
+}
+void dispose_object_images(void)
+{
+	SDL_FreeSurface(ghostslowImage);
 }
 
 void load_misc_images(void)
@@ -743,6 +767,16 @@ SDL_Surface* get_fruit_image(Fruit fruit)
 	exit(1);
 }
 
+SDL_Surface* get_object_image(Object object)
+{
+	switch (object)
+	{
+		case Ghostslow:     return ghostslowImage;
+	}
+
+	printf("incorrect enum value\naborting\n");
+	exit(1);
+}
 SDL_Surface* get_fruit_score_image(Fruit fruit)
 {
 	switch (fruit)

@@ -18,7 +18,12 @@
 static void process_player(PacmanGame *game,int player_num);// #8 Kim 2. player num 추가
 static void process_fruit(PacmanGame *game);
 static void process_ghosts(PacmanGame *game);
+<<<<<<< HEAD
 static void process_pellets(PacmanGame *game,int player_num);// #8 Kim 3. player num 추가
+=======
+static void process_pellets(PacmanGame *game);
+static void process_object(PacmanGame *game); //Yang #5: 2. object
+>>>>>>> master
 
 static bool check_pacghost_collision(PacmanGame *game);     //return true if pacman collided with any ghosts
 static void enter_state(PacmanGame *game, GameState state); //transitions to/ from a state
@@ -46,6 +51,11 @@ void game_tick(PacmanGame *game)
 			process_ghosts(game);
 
 			process_fruit(game);
+<<<<<<< HEAD
+=======
+			process_pellets(game);
+			process_object(game);
+>>>>>>> master
 
 			//#8 3. collusion pellet check 2개로
 			process_pellets(game,0);
@@ -190,6 +200,10 @@ void game_render(PacmanGame *game)
 			if (game->gameFruit4.eaten && ticks_game() - game->gameFruit4.eatenAt < 2000) draw_fruit_pts(&game->gameFruit4);
 			if (game->gameFruit5.eaten && ticks_game() - game->gameFruit5.eatenAt < 2000) draw_fruit_pts(&game->gameFruit5);
 
+			// #5 Yang : 3.object 표시
+			if (game->gameObject1.objectMode == Displaying_obj) draw_object_game(game->currentLevel, &game->gameObject1);
+			if (game->gameObject2.objectMode == Displaying_obj) draw_object_game(game->currentLevel, &game->gameObject2);
+			if (game->gameObject3.objectMode == Displaying_obj) draw_object_game(game->currentLevel, &game->gameObject3);
 			// #8 Kim : 1.
 			draw_pacman(&game->pacman[0]);
 			// #8 Kim : 2.
@@ -302,7 +316,7 @@ static void enter_state(PacmanGame *game, GameState state)
 
 			break;
 		case LevelBeginState:
-			
+
 			break;
 		case GamePlayState:
 			break;
@@ -597,8 +611,65 @@ static void process_fruit(PacmanGame *game)// player_index 해야할듯?
 
 }
 
+<<<<<<< HEAD
 static void process_pellets(PacmanGame *game,int player_num)
 {//#8 Kim 3. 그냥 배열넣는부부에 player_num 추가해줌으로써 이거 두번호출하고 0, 1 한번씩 호출 하게함.
+=======
+//#5 Yang : 프로세스 오브젝트 함수 추가
+static void process_object(PacmanGame *game)
+{
+	int pelletsEaten = game->pelletHolder.totalNum - game->pelletHolder.numLeft;
+
+	GameObject *o1 = &game->gameObject1;
+	GameObject *o2 = &game->gameObject2;
+	GameObject *o3 = &game->gameObject3;
+
+	int curLvl = game->currentLevel;
+
+	if (pelletsEaten >= 50 && o1->objectMode == NotDisplaying_obj)
+	{
+		o1->objectMode = Displaying_obj;
+		regen_object(o1, curLvl);
+	}
+	else if (pelletsEaten >= 100 && o2->objectMode == NotDisplaying_obj)
+	{
+		o2->objectMode = Displaying_obj;
+		regen_object(o2, curLvl);
+	}
+	else if (pelletsEaten >= 150 && o3->objectMode == NotDisplaying_obj)
+	{
+		o3->objectMode = Displaying_obj;
+		regen_object(o3, curLvl);
+	}
+	unsigned int o1dt = ticks_game() - o1->startedAt;
+	unsigned int o2dt = ticks_game() - o2->startedAt;
+	unsigned int o3dt = ticks_game() - o3->startedAt;
+
+	Pacman *pac = &game->pacman[0];
+
+	if (o1->objectMode == Displaying_obj)
+	{
+		if (o1dt > o1->displayTime) o1->objectMode = Displayed_obj;
+	}
+	if (o2->objectMode == Displaying_obj)
+	{
+		if (o2dt > o2->displayTime) o2->objectMode = Displayed_obj;
+	}if (o3->objectMode == Displaying_obj)
+	{
+		if (o3dt > o3->displayTime) o3->objectMode = Displayed_obj;
+	}
+
+	if (o1->objectMode == Displaying_obj && collides_obj(&pac->body, o1->x, o1->y))
+	{
+		o1->objectMode = Displayed_obj;
+		o1->eaten = true;
+		o1->eatenAt = ticks_game();
+	}
+
+}
+static void process_pellets(PacmanGame *game)
+{
+>>>>>>> master
 	int j = 0;
 	//if pacman and pellet collide
 	//give pacman that many points
@@ -701,6 +772,11 @@ void level_init(PacmanGame *game)
 	reset_fruit(&game->gameFruit3, &game->board);
 	reset_fruit(&game->gameFruit4, &game->board);
 	reset_fruit(&game->gameFruit5, &game->board);
+
+	//#5 Yang : 3.object reset
+	reset_object(&game->gameObject1, &game->board);
+	reset_object(&game->gameObject2, &game->board);
+	reset_object(&game->gameObject3, &game->board);
 
 }
 
