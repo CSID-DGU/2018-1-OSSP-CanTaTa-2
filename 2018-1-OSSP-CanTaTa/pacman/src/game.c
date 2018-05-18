@@ -18,12 +18,8 @@
 static void process_player(PacmanGame *game,int player_num);// #8 Kim 2. player num 추가
 static void process_fruit(PacmanGame *game);
 static void process_ghosts(PacmanGame *game);
-<<<<<<< HEAD
 static void process_pellets(PacmanGame *game,int player_num);// #8 Kim 3. player num 추가
-=======
-static void process_pellets(PacmanGame *game);
 static void process_object(PacmanGame *game); //Yang #5: 2. object
->>>>>>> master
 
 static bool check_pacghost_collision(PacmanGame *game);     //return true if pacman collided with any ghosts
 static void enter_state(PacmanGame *game, GameState state); //transitions to/ from a state
@@ -51,11 +47,7 @@ void game_tick(PacmanGame *game)
 			process_ghosts(game);
 
 			process_fruit(game);
-<<<<<<< HEAD
-=======
-			process_pellets(game);
 			process_object(game);
->>>>>>> master
 
 			//#8 3. collusion pellet check 2개로
 			process_pellets(game,0);
@@ -611,10 +603,6 @@ static void process_fruit(PacmanGame *game)// player_index 해야할듯?
 
 }
 
-<<<<<<< HEAD
-static void process_pellets(PacmanGame *game,int player_num)
-{//#8 Kim 3. 그냥 배열넣는부부에 player_num 추가해줌으로써 이거 두번호출하고 0, 1 한번씩 호출 하게함.
-=======
 //#5 Yang : 프로세스 오브젝트 함수 추가
 static void process_object(PacmanGame *game)
 {
@@ -667,9 +655,8 @@ static void process_object(PacmanGame *game)
 	}
 
 }
-static void process_pellets(PacmanGame *game)
-{
->>>>>>> master
+static void process_pellets(PacmanGame *game,int player_num)
+{//#8 Kim 3. 그냥 배열넣는부부에 player_num 추가해줌으로써 이거 두번호출하고 0, 1 한번씩 호출 하게함.
 	int j = 0;
 	//if pacman and pellet collide
 	//give pacman that many points
