@@ -108,6 +108,10 @@ void game_tick(PacmanGame *game)
 		case WinState:
 			//if (transitionLevel) //do transition here
 			if (dt > 4000) enter_state(game, LevelBeginState);
+			if(game->currentLevel > 0 && game->currentLevel <3)	load_board(&game->board, &game->pelletHolder, "maps/encodedboard1"); // #3 Choi : 1.
+			else if(game->currentLevel > 0 && game->currentLevel <3)	load_board(&game->board, &game->pelletHolder, "maps/encodedboard2"); // #3 Choi : 1.
+			else if(game->currentLevel > 2 && game->currentLevel <6)	load_board(&game->board, &game->pelletHolder, "maps/encodedboard3"); // #3 Choi : 1.
+			else if(game->currentLevel > 5)	load_board(&game->board, &game->pelletHolder, "maps/encodedboard4"); // #3 Choi : 1.
 
 			break;
 		case DeathState:
