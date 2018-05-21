@@ -66,3 +66,7 @@ void pacdeath_init(PacmanGame *game);
 
 //Returns the length of the given integer.
 int int_length(int num);
+
+//#5 Yang : 4. 각 object 효과 구현
+void game_object_function(GameObject *gameObject, PacmanGame *game);
+void game_object_function_end(GameObject *gameObject, PacmanGame *game);

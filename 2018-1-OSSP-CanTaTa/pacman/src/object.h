@@ -3,6 +3,7 @@
 #include <stdbool.h>
 #include "board.h"
 
+
 #define NUM_OBJECT 8
 
 typedef enum

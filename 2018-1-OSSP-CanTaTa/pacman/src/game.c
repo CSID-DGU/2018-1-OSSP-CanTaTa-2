@@ -633,6 +633,8 @@ static void process_object(PacmanGame *game)
 	unsigned int o2dt = ticks_game() - o2->startedAt;
 	unsigned int o3dt = ticks_game() - o3->startedAt;
 
+
+
 	Pacman *pac = &game->pacman[0];
 
 	if (o1->objectMode == Displaying_obj)
@@ -652,8 +654,38 @@ static void process_object(PacmanGame *game)
 		o1->objectMode = Displayed_obj;
 		o1->eaten = true;
 		o1->eatenAt = ticks_game();
+		game_object_function(o1,game);
 	}
-
+	if (o2->objectMode == Displaying_obj && collides_obj(&pac->body, o2->x, o2->y))
+	{
+		o2->objectMode = Displayed_obj;
+		o2->eaten = true;
+		o2->eatenAt = ticks_game();
+		game_object_function(o2,game);
+	}
+	if (o3->objectMode == Displaying_obj && collides_obj(&pac->body, o3->x, o3->y))
+	{
+		o3->objectMode = Displayed_obj;
+		o3->eaten = true;
+		o3->eatenAt = ticks_game();
+		game_object_function(o3,game);
+	}
+	//#5 Yang : 4. object 기능 구현
+	unsigned int o1et = ticks_game() - o1->eatenAt;
+	unsigned int o2et = ticks_game() - o2->eatenAt;
+	unsigned int o3et = ticks_game() - o3->eatenAt;
+	if (o1->eaten)
+	{
+		if (o1et > 5000) {game_object_function_end(o1,game);		o1->eaten = false;}
+	}
+	if (o2->eaten)
+	{
+		if (o2et > 5000) {game_object_function_end(o2,game);		o2->eaten = false;}
+	}
+	if (o3->eaten)
+	{
+		if (o3et > 5000) {game_object_function_end(o3,game);		o3->eaten = false;}
+	}
 }
 static void process_pellets(PacmanGame *game,int player_num)
 {//#8 Kim 3. 그냥 배열넣는부부에 player_num 추가해줌으로써 이거 두번호출하고 0, 1 한번씩 호출 하게함.
@@ -779,6 +811,9 @@ void pacdeath_init(PacmanGame *game)
 	reset_fruit(&game->gameFruit4, &game->board);
 	reset_fruit(&game->gameFruit5, &game->board);
 
+	reset_object(&game->gameObject1, &game->board);
+	reset_object(&game->gameObject2, &game->board);
+	reset_object(&game->gameObject3, &game->board);
 }
 
 //TODO: make this method based on a state, not a conditional
@@ -814,4 +849,29 @@ static bool resolve_telesquare(PhysicsBody *body)
 	if (body->x == 28) { body->x =  0; return true; }
 
 	return false;
+}
+
+//#5 Yang : 4.각 Object 효과 구현
+void game_object_function(GameObject *gameObject, PacmanGame *game)
+{
+	switch(gameObject->object)
+	{
+	case Ghostslow:
+		for(int i=0;i<4;i++)
+			game->ghosts[i].body.velocity=50;
+		return;
+	default: return;
+	}
+}
+void game_object_function_end(GameObject *gameObject, PacmanGame *game)
+{
+	switch(gameObject->object)
+	{
+	case Ghostslow:
+		for(int i=0;i<4;i++)
+			game->ghosts[i].body.velocity=80;
+	return;
+	default : return;
+	}
+
 }
