@@ -54,20 +54,26 @@ void draw_vanity_ghostline(GhostDisplayRow *row, int y, bool drawDescription, bo
 
 void draw_playMode(PlayMode playMode)//#13 : 2.메뉴 뷰 테스트중 일단 pellet 인포 지우고 처리해보자
 {
-
+	set_text_color(WhiteText); // #13 Dong : 2. Menu 화면에서 각 모드선택지 마다 빨간색으로 되도록 바꿈
 	draw_text_coord(get_screen(), "SINGLE", 10, 22);
 	draw_text_coord(get_screen(), "2 PLAYER", 10, 24);
 	draw_text_coord(get_screen(), "ONLINE", 10, 26);
 	switch(playMode)
 	{
 	case 0:
-		draw_text_coord(get_screen(), "O", 8, 22);
+		set_text_color(RedText);	// #13 Dong : 2.
+		draw_text_coord(get_screen(), "#", 8, 22);
+		draw_text_coord(get_screen(), "SINGLE", 10, 22);
 		break;
 	case 1:
-		draw_text_coord(get_screen(), "O", 8, 24);
+		set_text_color(RedText);	// #13 Dong : 2.
+		draw_text_coord(get_screen(), "#", 8, 24);
+		draw_text_coord(get_screen(), "2 PLAYER", 10, 24);
 		break;
 	case 2:
-		draw_text_coord(get_screen(), "O", 8, 26);
+		set_text_color(RedText);	// #13 Dong : 2.
+		draw_text_coord(get_screen(), "#", 8, 26);
+		draw_text_coord(get_screen(), "ONLINE", 10, 26);
 		break;
 
 	}

@@ -63,7 +63,7 @@ bool is_valid(char c)
 {
 	bool isChar = c >= 'A' && c <= 'Z';
 	bool isNum  = c >= '0' && c <= '9';
-	bool isSpec = c == ' ' || c == '!' || c == '.' || c == '-' || c == '/' || c == '@' || c == '"';
+	bool isSpec = c == ' ' || c == '!' || c == '.' || c == '-' || c == '/' || c == '@' || c == '"' || c == '#'; // #13 Dong : 화살표 추가를 위한 변경
 
 	return isChar || isNum || isSpec;
 }
@@ -171,6 +171,7 @@ static SDL_Surface *get_surface(char c)
 		case '!': return spec_fonts[textColor][4];
 		case '/': return spec_fonts[textColor][5];
 		case '"': return spec_fonts[textColor][6];
+		case '#': return spec_fonts[textColor][7]; // # 13 Dong : 화살표 추가
 	}
 
 	printf("error getting text surface with char %c\n", c);

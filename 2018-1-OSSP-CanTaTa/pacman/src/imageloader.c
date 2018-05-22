@@ -475,6 +475,7 @@ void load_char_images(void)
 	specImages[4] = load_image(DIR CHAR_DIR SPEC_DIR "exclamation.png");
 	specImages[5] = load_image(DIR CHAR_DIR SPEC_DIR "forwardslash.png");
 	specImages[6] = load_image(DIR CHAR_DIR SPEC_DIR "speechmark.png");
+	specImages[7] = load_image(DIR CHAR_DIR SPEC_DIR "pacmanarrow.png"); // #13 Dong : 메뉴화면 선택 화살표 모양 추가
 }
 
 void dispose_char_images(void)
@@ -496,6 +497,7 @@ void dispose_char_images(void)
 	SDL_FreeSurface(specImages[4]);
 	SDL_FreeSurface(specImages[5]);
 	SDL_FreeSurface(specImages[6]);
+	SDL_FreeSurface(specImages[7]); // # 13 Dong : 메뉴화면 선택 화살표모양 추가
 }
 
 SDL_Surface *load_image(const char *filename)
@@ -563,6 +565,7 @@ SDL_Surface* get_spec_image(char c)
 		case '!': return specImages[4];
 		case '/': return specImages[5];
 		case '"': return specImages[6];
+		case '#': return specImages[7]; // #13 Dong : 메뉴화면 화살표 추까
 	}
 
 	return NULL;

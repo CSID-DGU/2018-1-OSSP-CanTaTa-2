@@ -13,7 +13,7 @@
 
 #define NUM_CHAR_IMAGES 26
 #define NUM_NUM_IMAGES 10
-#define NUM_SPEC_IMAGES 7
+#define NUM_SPEC_IMAGES 8 // # 13 Dong : 갯수 수정
 
 void load_images(void);
 void dispose_images(void);
