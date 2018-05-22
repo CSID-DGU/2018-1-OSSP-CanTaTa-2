@@ -21,8 +21,13 @@ static void process_ghosts(PacmanGame *game);
 static void process_pellets(PacmanGame *game,int player_num);// #8 Kim 3. player num 추가
 static void process_object(PacmanGame *game); //Yang #5: 2. object
 
-static bool check_pacghost_collision(PacmanGame *game);     //return true if pacman collided with any ghosts
-static void enter_state(PacmanGame *game, GameState state); //transitions to/ from a state
+static bool check_pacghost_collision(PacmanGame *game,int player_num);     //return true if pacman collided with any ghosts
+//	//#14 Kim : 1. 흠 어케하지 이거를. 일단 player 2개로 추가해보도록 함
+
+static void enter_state(PacmanGame *game, GameState state ,int player_num); //transitions to/ from a state
+// #13 Kim : 1. 이 부분 collision 일어난 뒤에 state 부분에 DeathState 붙어서 가게됨.
+// default 값으로 0 넣어주고 가는 것도 나쁘지 않은듯?
+
 static bool resolve_telesquare(PhysicsBody *body);          //wraps the body around if they've gone tele square
 
 void game_tick(PacmanGame *game)
@@ -94,39 +99,42 @@ void game_tick(PacmanGame *game)
 	//
 
 	bool allPelletsEaten = game->pelletHolder.numLeft == 0;
-	bool collidedWithGhost = check_pacghost_collision(game);
+	bool collidedWithGhost = check_pacghost_collision(game,0);	//#14 Kim : 1. 흠 어케하지 이거를. 일단 player 선택하여 넣도록 추가해보도록 함
+	bool collidedWithGhost2 = check_pacghost_collision(game,1);
 	int lives = game->pacman[0].livesLeft;
 
 	switch (game->gameState)
 	{
 		case GameBeginState:
-			if (dt > 2200) enter_state(game, LevelBeginState);
+			if (dt > 2200) enter_state(game, LevelBeginState,0);
 
 			break;
 		case LevelBeginState:
-			if (dt > 1800) enter_state(game, GamePlayState);
+			if (dt > 1800) enter_state(game, GamePlayState,0);
 			game->pacman[0].godMode = false;// #8 Kim : 1. 흠..
 
 			break;
 		case GamePlayState:
 
 			//TODO: remove this hacks
-			if (key_held(SDLK_k)) enter_state(game, DeathState);
+			if (key_held(SDLK_k)) enter_state(game, WinState,0);
 
-			else if (allPelletsEaten) enter_state(game, WinState);
-			else if (collidedWithGhost) enter_state(game, DeathState);
+			else if (allPelletsEaten) enter_state(game, WinState,0);
+			else if (collidedWithGhost) enter_state(game, DeathState,0);//#14 일단 이때. 열로 들어가는데... 현제 스테이트는 GamePlayState고..
+			if(collidedWithGhost2)enter_state(game,DeathState,1);
+
 
 			break;
 		case WinState:
 			//if (transitionLevel) //do transition here
-			if (dt > 4000) enter_state(game, LevelBeginState);
+			if (dt > 4000) enter_state(game, LevelBeginState,0);
 
 			break;
 		case DeathState:
 			if (dt > 4000)
 			{
-				if (lives == 0) enter_state(game, GameoverState);
-				else enter_state(game, LevelBeginState);
+				if (lives == 0) enter_state(game, GameoverState,0);
+				else enter_state(game, LevelBeginState,0);
 			}
 
 			break;
@@ -281,13 +289,13 @@ void game_render(PacmanGame *game)
 	}
 }
 
-static void enter_state(PacmanGame *game, GameState state)
-{
+static void enter_state(PacmanGame *game, GameState state,int player_num)
+{// #14 Kim : 1. 이 부분 collision 일어난 뒤에 state 부분에 DeathState 붙어서 가게됨.
 	//process leaving a state
 	switch (game->gameState)
 	{
 		case GameBeginState:
-			game->pacman[0].livesLeft--;
+			game->pacman[player_num].livesLeft--;
 
 			break;
 		case WinState:
@@ -299,7 +307,7 @@ static void enter_state(PacmanGame *game, GameState state)
 			// Player died and is starting a new game, subtract a life
 			if (state == LevelBeginState)
 			{
-				game->pacman[0].livesLeft--;
+				game->pacman[player_num].livesLeft--;
 				pacdeath_init(game);
 			}
 			break;
@@ -466,6 +474,7 @@ static void process_ghosts(PacmanGame *game)
 				g->body.nextDir = g->body.curDir;
 				g->body.curDir = dir_opposite(g->body.curDir);
 			}
+
 
 			continue;
 		}
@@ -703,7 +712,7 @@ static void process_pellets(PacmanGame *game,int player_num)
 	//maybe next time, poor pacman
 }
 
-static bool check_pacghost_collision(PacmanGame *game)
+static bool check_pacghost_collision(PacmanGame *game , int player_num)	//#14 Kim : 1. 일단 player 2개로 추가해보도록 함
 {
 	for (int i = 0; i < 4; i++)
 	{
@@ -717,8 +726,8 @@ static bool check_pacghost_collision(PacmanGame *game)
 		}
 		*/
 
-		if (collides(&game->pacman[0].body, &g->body)) {
-			if(game->pacman[0].godMode == false)
+		if (collides(&game->pacman[player_num].body, &g->body)) {
+			if(game->pacman[player_num].godMode == false)
 				return true;
 			else {
 				if(g->isDead == 2) {return true;}
@@ -746,7 +755,7 @@ void gamestart_init(PacmanGame *game)
 
 	//invalidate the state so it doesn't effect the enter_state function
 	game->gameState = -1;
-	enter_state(game, GameBeginState);
+	enter_state(game, GameBeginState,0);
 }
 
 void level_init(PacmanGame *game)
