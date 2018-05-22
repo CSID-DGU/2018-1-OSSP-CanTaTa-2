@@ -44,10 +44,10 @@ int menu_tick(MenuSystem *menuSystem)
 		menuSystem->action = GoToGame;
 		return 0;
 	}
-
-	if (key_held(SDLK_UP))
+	// #13 Kim : 1 Key held로 하면 계속 눌린거로 되서 released를 사용
+	if (key_released(SDLK_UP))
 		return -1;
-	else if(key_held(SDLK_DOWN))
+	else if(key_released(SDLK_DOWN))
 		return 1;
 	else
 		return 0;

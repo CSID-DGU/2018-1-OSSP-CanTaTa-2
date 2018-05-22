@@ -43,7 +43,8 @@ void game_tick(PacmanGame *game)
 			// everyone can move and this is the standard 'play' game mode
 			//#8 2. player 두개로 늘림
 			process_player(game,0);
-			process_player(game,1);
+			if(game->playMode==Multi)// #13 Kim : 1. play Mode 에 따라서 추가
+				process_player(game,1);
 			process_ghosts(game);
 
 			process_fruit(game);
@@ -51,10 +52,13 @@ void game_tick(PacmanGame *game)
 
 			//#8 3. collusion pellet check 2개로
 			process_pellets(game,0);
-			process_pellets(game,1);
+
+			if(game->playMode==Multi)// #13 Kim : 1. play Mode 에 따라서 추가
+				process_pellets(game,1);
 
 			if (game->pacman[0].score > game->highscore ) game->highscore = game->pacman[0].score;// #8 Kim : 1.
-			if (game->pacman[1].score > game->highscore ) game->highscore = game->pacman[1].score;// #8 Kim : 2. 만약 p2가 최고점수면 ㅇㅇ
+			if(game->playMode==Multi)// #13 Kim : 1. play Mode 에 따라서 추가
+				if (game->pacman[1].score > game->highscore ) game->highscore = game->pacman[1].score;// #8 Kim : 2. 만약 p2가 최고점수면 ㅇㅇ
 
 			break;
 		case WinState:
@@ -101,7 +105,7 @@ void game_tick(PacmanGame *game)
 			break;
 		case LevelBeginState:
 			if (dt > 1800) enter_state(game, GamePlayState);
-			game->pacman[0].godMode = false;// #8 Kim : 1.
+			game->pacman[0].godMode = false;// #8 Kim : 1. 흠..
 
 			break;
 		case GamePlayState:
@@ -147,7 +151,7 @@ void game_render(PacmanGame *game)
 	draw_common_oneup(true, game->pacman[0].score);// #8 Kim : 1.
 	draw_common_highscore(game->highscore);
 
-	draw_pacman_lives(game->pacman[0].livesLeft);// #8 Kim : 1.
+	draw_pacman_lives(game->pacman[0].livesLeft);// #8 Kim : 1. 2p도 추가해줘야할듯!
 
 	draw_small_pellets(&game->pelletHolder);
 	draw_fruit_indicators(game->currentLevel);
@@ -170,7 +174,8 @@ void game_render(PacmanGame *game)
 
 			//we also draw pacman and ghosts (they are idle currently though)
 			draw_pacman_static(&game->pacman[0]);// #8 Kim : 1.
-			draw_pacman_static(&game->pacman[1]);// #8 Kim : 2. pacman 2도 그려보자~~
+			if(game->playMode==Multi)// #13 Kim : 1. play Mode 에 따라서 추가
+				draw_pacman_static(&game->pacman[1]);// #8 Kim : 2. pacman 2도 그려보자~~
 			for (int i = 0; i < 4; i++) draw_ghost(&game->ghosts[i]);
 
 			draw_large_pellets(&game->pelletHolder, false);
@@ -199,7 +204,8 @@ void game_render(PacmanGame *game)
 			// #8 Kim : 1.
 			draw_pacman(&game->pacman[0]);
 			// #8 Kim : 2.
-			draw_pacman(&game->pacman[1]);
+			if(game->playMode==Multi)// #13 Kim : 1. play Mode 에 따라서 추가
+				draw_pacman(&game->pacman[1]);
 
 			if(game->pacman[0].godMode == false) {
 				for (int i = 0; i < 4; i++) {
@@ -731,7 +737,8 @@ void gamestart_init(PacmanGame *game)
 
 	pacman_init(&game->pacman[0]);
 	// #8 Kim : 2. pacman init 부분도 추가
-	pacman_init(&game->pacman[1]);
+	if(game->playMode==Multi)// #13 Kim : 1. play Mode 에 따라서 추가
+		pacman_init(&game->pacman[1]);
 	//we need to reset all fruit
 	//fuit_init();
 	game->highscore = 0; //TODO maybe load this in from a file..?
@@ -770,7 +777,8 @@ void level_init(PacmanGame *game)
 void pacdeath_init(PacmanGame *game)
 {
 	pacman_level_init(&game->pacman[0]);
-	pacman_level_init(&game->pacman[1]); //#8 Kim : 2.level도 흠...
+	if(game->playMode==Multi)// #13 Kim : 1. play Mode 에 따라서 추가
+		pacman_level_init(&game->pacman[1]); //#8 Kim : 2.level도 흠...
 	ghosts_init(game->ghosts);
 
 	reset_fruit(&game->gameFruit1, &game->board);
