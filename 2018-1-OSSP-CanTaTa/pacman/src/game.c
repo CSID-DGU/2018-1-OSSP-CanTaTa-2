@@ -24,9 +24,9 @@ static void process_object(PacmanGame *game); //Yang #5: 2. object
 static bool check_pacghost_collision(PacmanGame *game,int player_num);     //return true if pacman collided with any ghosts
 //	//#14 Kim : 1. 흠 어케하지 이거를. 일단 player 2개로 추가해보도록 함
 
-static void enter_state(PacmanGame *game, GameState state ,int player_num); //transitions to/ from a state
+static void enter_state(PacmanGame *game, GameState state); //transitions to/ from a state
 // #13 Kim : 1. 이 부분 collision 일어난 뒤에 state 부분에 DeathState 붙어서 가게됨.
-// default 값으로 0 넣어주고 가는 것도 나쁘지 않은듯?
+//는 다시 수정.
 
 static bool resolve_telesquare(PhysicsBody *body);          //wraps the body around if they've gone tele square
 
@@ -77,7 +77,7 @@ void game_tick(PacmanGame *game)
 			//go to start level mode
 
 			break;
-		case DeathState:
+		case DeathState:case DeathState2: case ReviveState1:case ReviveState2:
 			// pacman has been eaten by a ghost and everything stops moving
 			// he then does death animation and game starts again
 
@@ -100,44 +100,58 @@ void game_tick(PacmanGame *game)
 
 	bool allPelletsEaten = game->pelletHolder.numLeft == 0;
 	bool collidedWithGhost = check_pacghost_collision(game,0);	//#14 Kim : 1. 흠 어케하지 이거를. 일단 player 선택하여 넣도록 추가해보도록 함
-	bool collidedWithGhost2 = check_pacghost_collision(game,1);
+	bool collidedWithGhost2=false;
+	if(game->playMode==Multi)
+		collidedWithGhost2 = check_pacghost_collision(game,1);
 	int lives = game->pacman[0].livesLeft;
 
 	switch (game->gameState)
 	{
 		case GameBeginState:
-			if (dt > 2200) enter_state(game, LevelBeginState,0);
+			if (dt > 2200) enter_state(game, LevelBeginState);
 
 			break;
 		case LevelBeginState:
-			if (dt > 1800) enter_state(game, GamePlayState,0);
+			if (dt > 1800) enter_state(game, GamePlayState);
 			game->pacman[0].godMode = false;// #8 Kim : 1. 흠..
-
+			break;
+		case ReviveState1:// #14 Kim : 2. ReviveState라는걸 추가해서 죽었을때 Level BeginState가 아니라 Revive로 가게했음
+			if (dt > 1800) enter_state(game, GamePlayState);
+			//game->pacman[0].godMode = false;// #8 Kim : 1. 흠..
+			break;
+		case ReviveState2:
+			if (dt > 1800) enter_state(game, GamePlayState);
+			//game->pacman[0].godMode = false;// #8 Kim : 1. 흠..
 			break;
 		case GamePlayState:
 
 			//TODO: remove this hacks
-			if (key_held(SDLK_k)) enter_state(game, WinState,0);
+			if (key_held(SDLK_k)) enter_state(game, WinState);
 
-			else if (allPelletsEaten) enter_state(game, WinState,0);
-			else if (collidedWithGhost) enter_state(game, DeathState,0);//#14 일단 이때. 열로 들어가는데... 현제 스테이트는 GamePlayState고..
-			if(collidedWithGhost2)enter_state(game,DeathState,1);
-
+			else if (allPelletsEaten) enter_state(game, WinState);
+			else if (collidedWithGhost) enter_state(game, DeathState);//#14 일단 이때. 열로 들어가는데... 현제 스테이트는 GamePlayState고..
+			if(game->playMode==Multi&&collidedWithGhost2)enter_state(game,DeathState2);//#14 Kim : 2. 2p가 죽었을때는 DeathState2로 간다.
 
 			break;
 		case WinState:
 			//if (transitionLevel) //do transition here
-			if (dt > 4000) enter_state(game, LevelBeginState,0);
+			if (dt > 4000) enter_state(game, LevelBeginState);
 
 			break;
 		case DeathState:
 			if (dt > 4000)
 			{
-				if (lives == 0) enter_state(game, GameoverState,0);
-				else enter_state(game, LevelBeginState,0);
+				if (lives == 0) enter_state(game, GameoverState);
+				else enter_state(game, ReviveState1);// #14 Kim : 2. ReviveState라는걸 추가해서 죽었을때 Level BeginState가 아니라 Revive로 가게했음
 			}
-
 			break;
+		case DeathState2:
+			if (dt > 4000)
+			{
+				if (lives == 0) enter_state(game, GameoverState);
+				else enter_state(game, ReviveState2);// #14 Kim : 2. ReviveState라는걸 추가해서 죽었을때 Level BeginState가 아니라 Revive로 가게했음
+			}
+				break;
 		case GameoverState:
 			if (dt > 2000)
 			{
@@ -184,6 +198,23 @@ void game_render(PacmanGame *game)
 			draw_pacman_static(&game->pacman[0]);// #8 Kim : 1.
 			if(game->playMode==Multi)// #13 Kim : 1. play Mode 에 따라서 추가
 				draw_pacman_static(&game->pacman[1]);// #8 Kim : 2. pacman 2도 그려보자~~
+			for (int i = 0; i < 4; i++) draw_ghost(&game->ghosts[i]);
+
+			draw_large_pellets(&game->pelletHolder, false);
+			draw_board(&game->board);
+			break;
+		case ReviveState1://#14 Kim : 2. ghost collision 후의 그냥 계속 진행 하게끔!!
+			draw_pacman_static(&game->pacman[0]);// #8 Kim : 1.
+			if (game->playMode==Multi)
+				draw_pacman_static(&game->pacman[1]);
+			for (int i = 0; i < 4; i++) draw_ghost(&game->ghosts[i]);
+
+			draw_large_pellets(&game->pelletHolder, false);
+			draw_board(&game->board);
+			break;
+		case ReviveState2:
+			draw_pacman_static(&game->pacman[1]);// #8 Kim : 1.
+			draw_pacman_static(&game->pacman[0]);
 			for (int i = 0; i < 4; i++) draw_ghost(&game->ghosts[i]);
 
 			draw_large_pellets(&game->pelletHolder, false);
@@ -261,26 +292,48 @@ void game_render(PacmanGame *game)
 			}
 
 			break;
-		case DeathState:
+		case DeathState: // #14 Kim : 2. 여기 통쨰로임 ㅇㅅㅇ
 			//draw everything the same for 1ish second
-			if (dt < 1000)
+			if (dt < 500)
 			{
 				//draw everything normally
-
 				//TODO: this actually draws the last frame pacman was on when he died
 				draw_pacman_static(&game->pacman[0]);
-
+				if (game->playMode==Multi)// #14
+					draw_pacman_static(&game->pacman[1]);
 				for (int i = 0; i < 4; i++) draw_ghost(&game->ghosts[i]);
 			}
 			else
 			{
 				//draw the death animation
-				draw_pacman_death(&game->pacman[0], dt - 1000);
+				draw_pacman_death(&game->pacman[0], dt - 500);
+				if(game->playMode==Multi)//#14
+					draw_pacman_static(&game->pacman[1]);
 			}
-
+			//#14 Kim : 2. 이 부분에서 ~ pac맨 그려준다요 그래서 부딪히고 죽는 모션에서 다른 플레이어도 출력하게끔 했음
 			draw_large_pellets(&game->pelletHolder, true);
 			draw_board(&game->board);
 			break;
+		case DeathState2://#14 Kim : 2. 2P가 죽었을 때. 여기도 마찬가지~
+			//draw everything the same for 1ish second
+			if (dt < 500)
+			{
+				//draw everything normally
+				//TODO: this actually draws the last frame pacman was on when he died
+				draw_pacman_static(&game->pacman[1]);
+				draw_pacman_static(&game->pacman[0]);
+				for (int i = 0; i < 4; i++) draw_ghost(&game->ghosts[i]);
+			}
+			else
+			{	//#14 Kim : 2. 이 부분에서 ~ pac맨 그려준다요 그래서 부딪히고 죽는 모션에서 다른 플레이어도 출력하게끔 했음
+				//draw the death animation
+				draw_pacman_death(&game->pacman[1], dt - 500);
+				draw_pacman_static(&game->pacman[0]);
+			}
+			draw_large_pellets(&game->pelletHolder, true);
+			draw_board(&game->board);
+			break;
+
 		case GameoverState:
 			draw_game_gameover();
 			draw_board(&game->board);
@@ -289,13 +342,15 @@ void game_render(PacmanGame *game)
 	}
 }
 
-static void enter_state(PacmanGame *game, GameState state,int player_num)
+static void enter_state(PacmanGame *game, GameState state)
 {// #14 Kim : 1. 이 부분 collision 일어난 뒤에 state 부분에 DeathState 붙어서 가게됨.
 	//process leaving a state
 	switch (game->gameState)
 	{
 		case GameBeginState:
-			game->pacman[player_num].livesLeft--;
+			game->pacman[0].livesLeft--;
+			if (game->playMode==Multi)
+				game->pacman[1].livesLeft--;//#14 Kim : 2. Player_num 없애고 그냥 이거로 대체
 
 			break;
 		case WinState:
@@ -307,10 +362,29 @@ static void enter_state(PacmanGame *game, GameState state,int player_num)
 			// Player died and is starting a new game, subtract a life
 			if (state == LevelBeginState)
 			{
-				game->pacman[player_num].livesLeft--;
-				pacdeath_init(game);
+				game->pacman[0].livesLeft--;
+				pacdeath_init(game,0);// #14 Kim : 2. 이거 한번 시도해보자 이거 주석처리하고 아래에서 처리해보자
+			}
+			else if(state==ReviveState1)// #14 Kim : 2. ReviveState라는걸 추가해서 죽었을때 Level BeginState가 아니라 Revive로 가게했음
+			{
+				game->pacman[0].livesLeft--;
+				pacdeath_init(game,0);// #14 Kim : 2. 이거 한번 시도해보자 이거 주석처리하고 아래에서 처리해보자
 			}
 			break;
+		case DeathState2://#14 Kim : 2. 2P가 죽었을 때.
+				// Player died and is starting a new game, subtract a life
+				if (state == LevelBeginState)
+				{
+					game->pacman[1].livesLeft--;
+					pacdeath_init(game,1);// #14 Kim : 2. 이거 한번 시도해보자 이거 주석처리하고 아래에서 처리해보자
+				}
+				else if(state==ReviveState2)// #14 Kim : 2. ReviveState라는걸 추가해서 죽었을때 Level BeginState가 아니라 Revive로 가게했음
+				{
+					game->pacman[1].livesLeft--;
+					pacdeath_init(game,1);// #14 Kim : 2. 이거 한번 시도해보자 이거 주석처리하고 아래에서 처리해보자
+				}
+				break;
+
 		default: ; //do nothing
 	}
 
@@ -329,7 +403,8 @@ static void enter_state(PacmanGame *game, GameState state,int player_num)
 		case WinState:
 
 			break;
-		case DeathState:
+		case DeathState:case DeathState2: case ReviveState1:case ReviveState2:
+		//	pacdeath_init(game); //#14 Kim : 2. 해보잣!
 			break;
 		case GameoverState:
 			break;
@@ -755,7 +830,7 @@ void gamestart_init(PacmanGame *game)
 
 	//invalidate the state so it doesn't effect the enter_state function
 	game->gameState = -1;
-	enter_state(game, GameBeginState,0);
+	enter_state(game, GameBeginState);
 }
 
 void level_init(PacmanGame *game)
@@ -783,19 +858,20 @@ void level_init(PacmanGame *game)
 
 }
 
-void pacdeath_init(PacmanGame *game)
+void pacdeath_init(PacmanGame *game,int player_num) //#14 Kim : 2. 이 부분도 어떤 팩맨이 죽었는지 추가해줘야할듯 했지만 사실 필요는 없는듯.. 흠..여기서 점수관련한걸 해줘야하나
 {
-	pacman_level_init(&game->pacman[0]);
-	if(game->playMode==Multi)// #13 Kim : 1. play Mode 에 따라서 추가
-		pacman_level_init(&game->pacman[1]); //#8 Kim : 2.level도 흠...
+	//pacman_level_init(&game->pacman[player_num]);
+	//	if(game->playMode==Multi)// #13 Kim : 1. play Mode 에 따라서 추가
+	//		pacman_level_init(&game->pacman[1]); //#8 Kim : 2.level도 흠...
+	//따라서 윗 부분은 필요 없게됨.
+	// #14 Kim : 2. 그리고 죽어도 계속 진행 되고 있는거니까  그냥 init , reset 부분 지우거
 	ghosts_init(game->ghosts);
-
-	reset_fruit(&game->gameFruit1, &game->board);
+	/*reset_fruit(&game->gameFruit1, &game->board);
 	reset_fruit(&game->gameFruit2, &game->board);
 	reset_fruit(&game->gameFruit3, &game->board);
 	reset_fruit(&game->gameFruit4, &game->board);
 	reset_fruit(&game->gameFruit5, &game->board);
-
+	 */
 }
 
 //TODO: make this method based on a state, not a conditional
