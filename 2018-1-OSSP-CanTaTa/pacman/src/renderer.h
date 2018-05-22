@@ -9,6 +9,7 @@
 #include "pellet.h"
 #include "text.h"
 #include "object.h"
+#include "game.h"
 
 //Holds data relating to a single rendered ghost-row.
 typedef struct
@@ -106,3 +107,6 @@ void draw_fruit_pts(GameFruit *gameFruit);
 
 void draw_board(Board *board);
 void draw_board_flash(Board *board);
+
+
+void draw_playMode(PlayMode playMode);//#13 kim : 메뉴에다가 그플레이ㄷ모드 그려죽ㅣ

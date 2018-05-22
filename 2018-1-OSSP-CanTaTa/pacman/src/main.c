@@ -90,6 +90,7 @@ static void internal_tick(void)
 			else
 				pacmanGame.playMode+=up_down;//그 외는 그안에서 왔다갔다 하도록 함.
 
+			menuSystem.playMode=pacmanGame.playMode; //#13 Kim : 이 부분에서 메뉴시스템한테 playMOde 전달~
 
 			if (menuSystem.action == GoToGame)
 			{
