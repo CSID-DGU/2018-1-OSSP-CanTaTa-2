@@ -10,10 +10,10 @@
 #include "renderer.h"
 
 //time till ghost-rows start appearing
-#define GHOST_START 1000
+#define GHOST_START 500
 
 //time between each ghost-row appearance
-#define GHOST_BETWEEN 2000
+#define GHOST_BETWEEN 500
 
 static void draw_vanity_screen(MenuSystem *menuSystem);
 static void draw_info_screen(void);
@@ -32,6 +32,7 @@ void menu_init(MenuSystem *menuSystem)
 {
 	menuSystem->action = Nothing;
 	menuSystem->ticksSinceModeChange = SDL_GetTicks();
+	menuSystem->playMode=Single;
 }
 // #8 Kim : 3. 메뉴 만들기
 // int 반환 하도록 함
@@ -44,10 +45,10 @@ int menu_tick(MenuSystem *menuSystem)
 		menuSystem->action = GoToGame;
 		return 0;
 	}
-
-	if (key_held(SDLK_UP))
+	// #13 Kim : 1 Key held로 하면 계속 눌린거로 되서 released를 사용
+	if (key_released(SDLK_UP))
 		return -1;
-	else if(key_held(SDLK_DOWN))
+	else if(key_released(SDLK_DOWN))
 		return 1;
 	else
 		return 0;
@@ -74,10 +75,11 @@ static void draw_vanity_screen(MenuSystem *menuSystem)
 		GhostDisplayRow r = enemyRows[i];
 		draw_ghost_line(&r, 7 + 3 * i, dt - current);
 	}
-
-	if (dt > 9500) draw_vanity_pellet_info(false);
-	if (dt > 10500) draw_vanity_corporate_info();
-	if (dt > 11500) draw_vanity_animation(dt - 11500);
+	//#13 Kim : 일단 이부분좀 빠르게 지바꿔놓을까 생각중
+	//if (dt > 3000) draw_vanity_pellet_info(false);
+	if(dt>3000)draw_playMode(menuSystem->playMode);
+	if (dt > 4000) draw_vanity_corporate_info();
+	if (dt > 5000) draw_vanity_animation(dt - 5000);
 }
 
 static void draw_info_screen(void)
@@ -85,6 +87,7 @@ static void draw_info_screen(void)
 	draw_player_info();
 	draw_instrc_info();
 	draw_instrc_corporate_info();
+
 }
 
 static void draw_player_info(void)

@@ -13,7 +13,11 @@ typedef enum {
 	GamePlayState,
 	WinState,
 	DeathState,
-	GameoverState
+	GameoverState,
+	ReviveState1,//#14 Kim : 이거 추가해서 ...해보자..그..뭐ㅓㅑ...
+	ReviveState2,
+	DeathState2
+
 } GameState;
 
 //what you do in current state
@@ -62,7 +66,7 @@ void gamestart_init(PacmanGame *game);
 void level_init(PacmanGame *game);
 
 //Call after pacman dies to reinitialize entities to continue the same level.
-void pacdeath_init(PacmanGame *game);
+void pacdeath_init(PacmanGame *game,int player_num);
 
 //Returns the length of the given integer.
 int int_length(int num);

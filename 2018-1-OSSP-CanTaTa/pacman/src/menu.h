@@ -1,5 +1,5 @@
 #pragma once
-
+#include "game.h"
 //Defines what action we should take at a particular time while on the menu.
 typedef enum
 {
@@ -12,6 +12,7 @@ typedef struct
 {
 	MenuAction action;
 	unsigned int ticksSinceModeChange;
+	PlayMode playMode;//# 메뉴화면에 넣기위한 playMode...
 } MenuSystem;
 
 //Performs a single tick on the menu system.
