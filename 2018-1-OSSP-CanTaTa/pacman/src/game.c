@@ -16,10 +16,10 @@
 #include <time.h>
 
 static void process_player(PacmanGame *game,int player_num);// #8 Kim 2. player num 추가
-static void process_fruit(PacmanGame *game);
+static void process_fruit(PacmanGame *game, int player_num);//#5 Yang : 5. playernum 추가
 static void process_ghosts(PacmanGame *game);
 static void process_pellets(PacmanGame *game,int player_num);// #8 Kim 3. player num 추가
-static void process_object(PacmanGame *game); //Yang #5: 2. object
+static void process_object(PacmanGame *game, int player_num); //Yang #5: 2. object
 
 static bool check_pacghost_collision(PacmanGame *game,int player_num);     //return true if pacman collided with any ghosts
 //	//#14 Kim : 1. 흠 어케하지 이거를. 일단 player 2개로 추가해보도록 함
@@ -52,15 +52,17 @@ void game_tick(PacmanGame *game)
 				process_player(game,1);
 			process_ghosts(game);
 
-			process_fruit(game);
-			process_object(game);
+			process_fruit(game,0);
+			process_object(game,0);
 
 			//#8 3. collusion pellet check 2개로
 			process_pellets(game,0);
 
-			if(game->playMode==Multi)// #13 Kim : 1. play Mode 에 따라서 추가
+			if(game->playMode==Multi){// #13 Kim : 1. play Mode 에 따라서 추가
 				process_pellets(game,1);
-
+				process_object(game,1);//#5 Yang : 5. 2p일 때 변수추
+				process_fruit(game,1);
+			}
 			if (game->pacman[0].score > game->highscore ) game->highscore = game->pacman[0].score;// #8 Kim : 1.
 			if(game->playMode==Multi)// #13 Kim : 1. play Mode 에 따라서 추가
 				if (game->pacman[1].score > game->highscore ) game->highscore = game->pacman[1].score;// #8 Kim : 2. 만약 p2가 최고점수면 ㅇㅇ
@@ -585,7 +587,7 @@ static void process_ghosts(PacmanGame *game)
 	}
 }
 
-static void process_fruit(PacmanGame *game)// player_index 해야할듯?
+static void process_fruit(PacmanGame *game, int playernum)//#5 Yang : 5. playernum 추가
 {
 	int pelletsEaten = game->pelletHolder.totalNum - game->pelletHolder.numLeft;
 
@@ -629,7 +631,7 @@ static void process_fruit(PacmanGame *game)// player_index 해야할듯?
 	unsigned int f4dt = ticks_game() - f4->startedAt;
 	unsigned int f5dt = ticks_game() - f5->startedAt;
 
-	Pacman *pac = &game->pacman[0];
+	Pacman *pac = &game->pacman[playernum];
 
 	if (f1->fruitMode == Displaying)
 	{
@@ -694,7 +696,7 @@ static void process_fruit(PacmanGame *game)// player_index 해야할듯?
 }
 
 //#5 Yang : 프로세스 오브젝트 함수 추가
-static void process_object(PacmanGame *game)
+static void process_object(PacmanGame *game, int playernum)//#5 Yang : 5.process_object에 playernum 변수 추가
 {
 	int pelletsEaten = game->pelletHolder.totalNum - game->pelletHolder.numLeft;
 
@@ -725,7 +727,7 @@ static void process_object(PacmanGame *game)
 
 
 
-	Pacman *pac = &game->pacman[0];
+	Pacman *pac = &game->pacman[playernum];
 
 	if (o1->objectMode == Displaying_obj)
 	{
@@ -744,21 +746,21 @@ static void process_object(PacmanGame *game)
 		o1->objectMode = Displayed_obj;
 		o1->eaten = true;
 		o1->eatenAt = ticks_game();
-		game_object_function(o1,game);
+		game_object_function(o1,game, playernum);
 	}
 	if (o2->objectMode == Displaying_obj && collides_obj(&pac->body, o2->x, o2->y))
 	{
 		o2->objectMode = Displayed_obj;
 		o2->eaten = true;
 		o2->eatenAt = ticks_game();
-		game_object_function(o2,game);
+		game_object_function(o2,game,playernum);
 	}
 	if (o3->objectMode == Displaying_obj && collides_obj(&pac->body, o3->x, o3->y))
 	{
 		o3->objectMode = Displayed_obj;
 		o3->eaten = true;
 		o3->eatenAt = ticks_game();
-		game_object_function(o3,game);
+		game_object_function(o3,game,playernum);
 	}
 	//#5 Yang : 4. object 기능 구현
 	unsigned int o1et = ticks_game() - o1->eatenAt;
@@ -766,15 +768,15 @@ static void process_object(PacmanGame *game)
 	unsigned int o3et = ticks_game() - o3->eatenAt;
 	if (o1->eaten)
 	{
-		if (o1et > 5000) {game_object_function_end(o1,game);		o1->eaten = false;}
+		if (o1et > 5000) {game_object_function_end(o1,game,playernum);		o1->eaten = false;}
 	}
 	if (o2->eaten)
 	{
-		if (o2et > 5000) {game_object_function_end(o2,game);		o2->eaten = false;}
+		if (o2et > 5000) {game_object_function_end(o2,game,playernum);		o2->eaten = false;}
 	}
 	if (o3->eaten)
 	{
-		if (o3et > 5000) {game_object_function_end(o3,game);		o3->eaten = false;}
+		if (o3et > 5000) {game_object_function_end(o3,game,playernum);		o3->eaten = false;}
 	}
 }
 static void process_pellets(PacmanGame *game,int player_num)
@@ -945,7 +947,7 @@ static bool resolve_telesquare(PhysicsBody *body)
 }
 
 //#5 Yang : 4.각 Object 효과 구현
-void game_object_function(GameObject *gameObject, PacmanGame *game)
+void game_object_function(GameObject *gameObject, PacmanGame *game, int playernum)//#5 Yang : 5. playernum 추가
 {
 	switch(gameObject->object)
 	{
@@ -956,7 +958,7 @@ void game_object_function(GameObject *gameObject, PacmanGame *game)
 	default: return;
 	}
 }
-void game_object_function_end(GameObject *gameObject, PacmanGame *game)
+void game_object_function_end(GameObject *gameObject, PacmanGame *game, int playernum) //#5 Yang : 5. playernum 추가
 {
 	switch(gameObject->object)
 	{
