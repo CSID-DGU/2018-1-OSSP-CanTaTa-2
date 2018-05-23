@@ -8,4 +8,6 @@
 .settings/
 Debug/
 game_Debug
+server
+client
 
