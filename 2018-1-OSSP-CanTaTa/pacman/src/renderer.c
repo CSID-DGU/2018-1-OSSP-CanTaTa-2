@@ -289,18 +289,17 @@ void draw_object_indicator(int currentLevel)
 
 		for (int i = index; i > 0; i--)
 		{
-			Object object = object_for_level(currentLevel - (index - i));
+			Object object = random_object();
 			SDL_Surface *image = get_object_image(object);
 
 			apply_surface(x - i * 16 * 2, y, image);
 		}
 }
-void draw_object_game(int currentLevel, GameObject *gameObject)
+void draw_object_game (int curruntLevel, GameObject *gameObject)
 {
-	Object object = object_for_level(currentLevel);
-		SDL_Surface *image = get_object_image(object);
+	Object object = gameObject->object;
+		SDL_Surface *image = get_object_image(object); //#3 Yang : 6.object 출현 방식 수정
 
-		//TODO: maybe this offset isn't the same for all fruit. Investigate
 		draw_image_coord_offset(image, gameObject->x, gameObject->y + 2, -5, 8);
 }
 //

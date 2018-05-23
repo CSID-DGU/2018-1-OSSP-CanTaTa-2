@@ -1,5 +1,5 @@
 #include "object.h"
-
+#include "game.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
@@ -13,12 +13,13 @@ int object_points(Object object)
 	switch (object)
 	{
 		case Ghostslow:     return 100;
+		case Life: 			return 100;
 	}
 
 	printf("invalid object\naborting\n");
 	exit(1);
 }
-
+/*
 Object object_for_level(int level)
 {
 	if (level < 1)
@@ -34,7 +35,18 @@ Object object_for_level(int level)
 		default:          return Ghostslow;
 	}
 }
+*/
 
+//#5 Yang : 6.object 출현 방식 변경
+Object random_object()
+{
+	int random = rand()%NUM_OBJECT;
+	switch(random){
+	case 0: return Ghostslow;
+	case 1: return Life;
+	default : return Ghostslow;
+	}
+}
 void reset_object(GameObject *gameObject, Board *board)
 {
 	//srand((unsigned)time(NULL));
@@ -45,7 +57,7 @@ void reset_object(GameObject *gameObject, Board *board)
 			randY = rand() % 30;
 	} while( (is_valid_square(board, randX, randY) || is_tele_square(randX, randY) ) == false);
 
-	gameObject->object = Ghostslow;
+	gameObject->object = random_object();
 	gameObject->objectMode = NotDisplaying_obj;
 	gameObject->startedAt = 0;
 	gameObject->displayTime = 0;
@@ -56,10 +68,10 @@ void reset_object(GameObject *gameObject, Board *board)
 	gameObject->x = randX;
 	gameObject->y = randY;
 }
-
-void regen_object(GameObject *gameObject, int level)
+//#5 YANG : Object 출현방식 변경
+void regen_object(GameObject *gameObject)
 {
-	gameObject->object = object_for_level(level);
+	gameObject->object = random_object();
 	gameObject->displayTime = rand_object_visible_time();
 	gameObject->startedAt = ticks_game();
 }

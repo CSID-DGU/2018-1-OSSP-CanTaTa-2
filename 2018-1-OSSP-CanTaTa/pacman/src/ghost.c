@@ -168,8 +168,7 @@ void execute_ghost_logic(Ghost *targetGhost, GhostType type, Ghost *redGhost, Pa
 		send_to_home(targetGhost, type);
 		return;
 	}
-
-	switch (type)
+		switch (type)
 	{
 		case Blinky: execute_red_logic(targetGhost, pacman);            break;
 		case Inky:   execute_blue_logic(targetGhost, redGhost, pacman); break;
