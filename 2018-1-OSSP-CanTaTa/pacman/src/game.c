@@ -709,17 +709,17 @@ static void process_object(PacmanGame *game, int playernum)//#5 Yang : 5.process
 	if (pelletsEaten >= 50 && o1->objectMode == NotDisplaying_obj)
 	{
 		o1->objectMode = Displaying_obj;
-		regen_object(o1, curLvl);
+		regen_object(o1);
 	}
 	else if (pelletsEaten >= 100 && o2->objectMode == NotDisplaying_obj)
 	{
 		o2->objectMode = Displaying_obj;
-		regen_object(o2, curLvl);
+		regen_object(o2);
 	}
 	else if (pelletsEaten >= 150 && o3->objectMode == NotDisplaying_obj)
 	{
 		o3->objectMode = Displaying_obj;
-		regen_object(o3, curLvl);
+		regen_object(o3);
 	}
 	unsigned int o1dt = ticks_game() - o1->startedAt;
 	unsigned int o2dt = ticks_game() - o2->startedAt;
@@ -955,6 +955,10 @@ void game_object_function(GameObject *gameObject, PacmanGame *game, int playernu
 		for(int i=0;i<4;i++)
 			game->ghosts[i].body.velocity=50;
 		return;
+	//#15 Yang : 1.생명추가 object 추가
+	case Life:
+		game->pacman[playernum].livesLeft++;
+		return;
 	default: return;
 	}
 }
@@ -966,6 +970,7 @@ void game_object_function_end(GameObject *gameObject, PacmanGame *game, int play
 		for(int i=0;i<4;i++)
 			game->ghosts[i].body.velocity=80;
 	return;
+	case Life: return;
 	default : return;
 	}
 

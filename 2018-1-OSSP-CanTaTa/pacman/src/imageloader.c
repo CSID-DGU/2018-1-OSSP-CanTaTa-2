@@ -118,6 +118,8 @@ SDL_Surface *keyImage;
 //#5 Yang : 3. object renderering
 //object images
 SDL_Surface *ghostslowImage;
+//#15 Yang : 1.라이프 추가
+SDL_Surface *lifeImage;
 
 
 void load_board_images(void);
@@ -397,10 +399,12 @@ void dispose_fruit_images(void)
 void load_object_images(void)
 {
 	ghostslowImage = load_image(DIR OBJECT_DIR "ghostslow.png");
+	lifeImage = load_image(DIR OBJECT_DIR "heart.png");
 }
 void dispose_object_images(void)
 {
 	SDL_FreeSurface(ghostslowImage);
+	SDL_FreeSurface(lifeImage);
 }
 
 void load_misc_images(void)
@@ -772,6 +776,7 @@ SDL_Surface* get_object_image(Object object)
 	switch (object)
 	{
 		case Ghostslow:     return ghostslowImage;
+		case Life: 		   return lifeImage; //#15 Yang : 1.생명추가 object 추가
 	}
 
 	printf("incorrect enum value\naborting\n");

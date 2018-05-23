@@ -4,11 +4,12 @@
 #include "board.h"
 
 
-#define NUM_OBJECT 8
+#define NUM_OBJECT 2
 
 typedef enum
 {
-	Ghostslow
+	Ghostslow,
+	Life		//#15 Yang : 1.생명 증가 object 추가
 }Object;
 
 //Different modes a fruit can be in while in-game
@@ -39,7 +40,7 @@ typedef struct
 int objcet_points(Object object);
 
 //Returns the fruit that should be displayed for the given level.
-Object object_for_level(int level);
+//Object object_for_level(int level);
 
 //Generates a random time between 9000-10000 ms, for which the fruit should be displayed.
 int rand_object_visible_time(void);
@@ -47,5 +48,6 @@ int rand_object_visible_time(void);
 //Resets the given fruit back to its default state.
 void reset_object(GameObject *gameObject, Board *board);
 
-//Assigns the appropriate fruit based of the level, and generates a visible-time for the fruit.
-void regen_object(GameObject *gameObject, int level);
+//#5 Yang : 6.object 출현 방식 변경
+Object random_object(void);
+void regen_object(GameObject *gameObject);
