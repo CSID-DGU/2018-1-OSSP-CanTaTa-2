@@ -7,12 +7,13 @@
 #include "imageloader.h"
 #include "text.h"
 #include "window.h"
-#include "game.h"
+//#include "game.h"
+
 
 //draws an image at a board coordinate
 void draw_image_coord(SDL_Surface *surface, int x, int y);
 void draw_image_coord_offset(SDL_Surface *surface, int x, int y, int xOffset, int yOffset);
-
+void draw_playMode(PlayMode playMode);//#13 : 2.메뉴 뷰 테스트중 일단 pellet 인포 지워버리자
 //Offset the board is off from the top of the screen
 //Needed because some items are stored in board (x,y) coords and need to be rendered at an offset
 #define Y_OFFSET 3
@@ -51,6 +52,26 @@ void draw_vanity_ghostline(GhostDisplayRow *row, int y, bool drawDescription, bo
 	}
 }
 
+void draw_playMode(PlayMode playMode)//#13 : 2.메뉴 뷰 테스트중 일단 pellet 인포 지우고 처리해보자
+{
+
+	draw_text_coord(get_screen(), "SINGLE", 10, 22);
+	draw_text_coord(get_screen(), "2 PLAYER", 10, 24);
+	draw_text_coord(get_screen(), "ONLINE", 10, 26);
+	switch(playMode)
+	{
+	case 0:
+		draw_text_coord(get_screen(), "O", 8, 22);
+		break;
+	case 1:
+		draw_text_coord(get_screen(), "O", 8, 24);
+		break;
+	case 2:
+		draw_text_coord(get_screen(), "O", 8, 26);
+		break;
+
+	}
+}
 void draw_vanity_charnickname(void)
 {
 	set_text_color(WhiteText);

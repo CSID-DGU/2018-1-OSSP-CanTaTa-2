@@ -1,0 +1,11 @@
+*.cproject
+*.project
+.cproject/
+.project/
+.metadata/
+2018-1-OSSP-CanTaTa-2/pacman/game_Debug
+2018-1-OSSP-CanTaTa-2/pacman/Debug/
+.settings/
+Debug/
+game_Debug
+
