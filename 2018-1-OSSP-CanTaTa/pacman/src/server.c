@@ -1,39 +1,28 @@
+#include "server.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
 #include <arpa/inet.h>
 #include <sys/types.h>
-#include <sys/socket.h>
 
-#define PORT 32421
-
-int main()
+void makeServer()
 {
-	int s_socket_fd;
-	int c_socket_fd;
-	struct sockaddr_in  server_address,  client_address;
-
-	int client_address_size;
-	char Msg2Client[]="Hello Client!!\n";
-	char Msg2Server[100];
 	/*클라이언트의 접속을 기다리는 서버소켓 객체 생성*/
 	s_socket_fd = socket(PF_INET, SOCK_STREAM, 0);
-	printf("서버가 만들어짐\n");
-
+	printf("서버가 만들었다.\n");
 	/*서버의 IP 와 PORT 를 저장할 server_address 객체를 0으로 초기화 시킴*/
+
+
 	memset(&server_address, 0, sizeof(server_address));
 	/*server_address 에 서버의 주소 정보 대입*/
 	server_address.sin_family=AF_INET;
 	server_address.sin_addr.s_addr=htonl(INADDR_ANY);
 	server_address.sin_port=htons(PORT);
-
-
 	bind(s_socket_fd, (struct sockaddr*) &server_address, sizeof(server_address)) ;
 	/*클라이언트의 접속을 기다리는 대기 모드로 전환*/
    listen(s_socket_fd, 5);
    printf("기다려...\n");
-
 
    client_address_size = sizeof(client_address);
     /*클라이언트가 서버에 접속하면 접속을 수락함*/
@@ -75,7 +64,5 @@ int main()
 //	   	write(c_socket_fd, tosv, sizeof(tosv));
    }
 	close(c_socket_fd);
-
-	printf("d");
-	return 0;
 }
+

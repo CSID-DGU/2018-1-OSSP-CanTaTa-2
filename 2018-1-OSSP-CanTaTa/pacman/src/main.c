@@ -97,6 +97,10 @@ static void internal_tick(void)
 				state = Game;
 				startgame_init();
 			}
+			else if(menuSystem.action == GoToJoin)
+			{
+				state = Join;
+			}
 
 			break;
 		case Game:
@@ -112,6 +116,9 @@ static void internal_tick(void)
 			break;
 		case Intermission:
 			intermission_tick();
+			break;
+		case Join:
+
 			break;
 	}
 }
@@ -130,6 +137,9 @@ static void internal_render(void)
 			break;
 		case Intermission:
 			intermission_render();
+			break;
+		case Join:
+			online_mode_render(&menuSystem);
 			break;
 	}
 
@@ -210,7 +220,7 @@ static void key_down_hacks(int keycode)
 	static bool rateSwitch = false;
 
 	//TODO: remove this hack and try make it work with the physics body
-	if (keycode == SDLK_SPACE) fps_sethz((rateSwitch = !rateSwitch) ? 200 : 60);
+	if (keycode == SDLK_SPACE) fps_sethz(60);//(rateSwitch = !rateSwitch) ? 200 : 60);// 버그 : 일단 ..뭐지흠.
 
 	if (keycode == SDLK_b) {
 		if(!pacmanGame.pacman[0].boostOn) {

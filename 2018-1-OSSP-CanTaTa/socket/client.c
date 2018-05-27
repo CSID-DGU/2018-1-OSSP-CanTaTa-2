@@ -35,14 +35,6 @@ int main()  {
 	{
 
 
-//
-//		if(read(clientSocket, fromServer, sizeof(fromServer)))
-//			printf("From Server Message: %s\n",fromServer);
-//
-//		scanf("%s",tosv);
-//	write(clientSocket,tosv,sizeof(tosv));
-
-
 		 /* 입력 받을 버퍼 생성  */
 		 char message[255];
 		 memset(message,0,strlen(message));

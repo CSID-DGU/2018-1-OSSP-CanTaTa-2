@@ -9,15 +9,20 @@
 #include "main.h"
 #include "renderer.h"
 
+
 //time till ghost-rows start appearing
 #define GHOST_START 500
 
 //time between each ghost-row appearance
 #define GHOST_BETWEEN 500
+static char tmp[100]={"000.000"};
+static int index_num=0;
 
+
+static int getKey();
 static void draw_vanity_screen(MenuSystem *menuSystem);
 static void draw_info_screen(void);
-
+static void draw_online_mode(MenuSystem *menuSystem);
 static void draw_ghost_line(GhostDisplayRow *row, int y, unsigned int dt);
 static void draw_player_info(void);
 
@@ -42,7 +47,10 @@ int menu_tick(MenuSystem *menuSystem)
 	bool startNew = key_held(SDLK_KP_ENTER) || key_held(SDLK_RETURN);
 	if (startNew)
 	{
-		menuSystem->action = GoToGame;
+		if(menuSystem->playMode==Online)
+			menuSystem->action = GoToJoin;// #19 Kim : 1. 여기서 저게 온라인게임으로 되미녀 엑션 바뀌
+		else
+			menuSystem->action = GoToGame;
 		return 0;
 	}
 	// #13 Kim : 1 Key held로 하면 계속 눌린거로 되서 released를 사용
@@ -81,6 +89,41 @@ static void draw_vanity_screen(MenuSystem *menuSystem)
 	if (dt > 4000) draw_vanity_corporate_info();
 	if (dt > 5000) draw_vanity_animation(dt - 5000);
 }
+static void draw_online_mode(MenuSystem *menuSystem)//#19 Kim : 1. 일단 메뉴에서 눌렀을때 들어가서 조작하는 화면 만들어보기
+{
+	unsigned int dt = SDL_GetTicks() - menuSystem->ticksSinceModeChange;
+
+
+	if(getKey())
+		tmp[index_num++] = (char)getKey();
+
+	set_text_color(WhiteText);
+	draw_text_coord(get_screen(), "MAKE ROOM", 10, 8);
+	draw_text_coord(get_screen(), "JOIN ROOM", 10, 13);
+	draw_text_coord(get_screen(), "WRITE SERVER IP", 7, 18);
+	draw_text_coord(get_screen(), tmp, 7, 23	);
+
+}
+static int getKey()
+{
+	for(int i = 48 ; i <=57 ; i ++)
+	{
+		if(key_released(i))
+			return i;
+	}
+	if(key_released(SDLK_PERIOD))
+		return '.';
+
+	return 0;
+}
+
+void online_mode_render(MenuSystem *menuSystem)
+{
+
+		draw_online_mode(menuSystem);
+
+}
+
 
 static void draw_info_screen(void)
 {

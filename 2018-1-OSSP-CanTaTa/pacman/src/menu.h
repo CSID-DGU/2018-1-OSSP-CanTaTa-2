@@ -4,7 +4,8 @@
 typedef enum
 {
 	Nothing,
-	GoToGame
+	GoToGame,
+	GoToJoin// #19 Kim : 1. 메뉴에서 눌렀을때 열로가려고 ..만들었음일단..
 } MenuAction;
 
 //Defines the menu system.
@@ -17,6 +18,8 @@ typedef struct
 
 //Performs a single tick on the menu system.
 int menu_tick(MenuSystem *menuSystem);
+void online_mode_render(MenuSystem *menuSystem);
+
 
 //Renders the menu system in its current state.
 void menu_render(MenuSystem *menuSystem);
