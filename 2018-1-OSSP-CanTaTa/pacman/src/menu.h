@@ -19,11 +19,11 @@ typedef struct
 
 //Performs a single tick on the menu system.
 int menu_tick(MenuSystem *menuSystem);
-void online_mode_render(MenuSystem *menuSystem);
+int online_mode_render(MenuSystem *menuSystem);// #20 Kim : 1. int 로 반환형 바꾸가
 
 
 //Renders the menu system in its current state.
 void menu_render(MenuSystem *menuSystem);
 
 void menu_init(MenuSystem *menuSystem);
-int getKey();
+int getKey(void);// #19 Kim : 키 받아오기위해서

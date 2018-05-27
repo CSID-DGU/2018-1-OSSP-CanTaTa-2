@@ -40,8 +40,10 @@ int main()  {
 		 memset(message,0,strlen(message));
 
 		 /* 사용자로부터 입력 받음 */
-		 printf("Client : ");
-		 fgets(message,255,stdin);
+		 //printf("Client : ");
+		 message[0]='o';
+		 message[1]='\0';
+		 //fgets(message,255,stdin);
 
 
 		 /* 입력 받은 문자 센드 */
@@ -61,7 +63,7 @@ int main()  {
 
 		 if(strcmp(buffer,"/quit\n") == 0)
 		  break;
-		 printf("from : %s ",buffer);
+		 //printf("from : %s ",buffer);
 		 memset(buffer,0,sizeof(buffer));
 
 

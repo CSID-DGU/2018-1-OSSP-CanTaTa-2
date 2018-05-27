@@ -14,6 +14,7 @@
 #include "window.h"
 #include <stdlib.h>
 #include <time.h>
+#include "server.h"// #20 Kim : 1. 헤더 추가해주기
 
 static void process_player(PacmanGame *game,int player_num);// #8 Kim 2. player num 추가
 static void process_fruit(PacmanGame *game, int player_num);//#5 Yang : 5. playernum 추가
@@ -454,6 +455,9 @@ static void process_player(PacmanGame *game,int player_num)
 	Direction oldLastAttemptedDir = pacman->lastAttemptedMoveDirection;
 
 	Direction newDir;
+
+	get_client_position();//#20 Kim : 여기서 상대 위치 받을 까 생각중임
+
 
 	bool dirPressed = dir_pressed_now(&newDir,player_num);//#8 Kim : 2.플레이어마다 키가 달라짐.
 

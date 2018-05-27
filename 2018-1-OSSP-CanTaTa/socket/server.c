@@ -5,7 +5,7 @@
 #include <arpa/inet.h>
 #include <sys/types.h>
 #include <sys/socket.h>
-
+#include "renderer.h"
 #define PORT 32421
 
 int main()
@@ -19,7 +19,7 @@ int main()
 	char Msg2Server[100];
 	/*클라이언트의 접속을 기다리는 서버소켓 객체 생성*/
 	s_socket_fd = socket(PF_INET, SOCK_STREAM, 0);
-	printf("서버가 만들어짐\n");
+	draw_wait_client("MAKE ROOM....");
 
 	/*서버의 IP 와 PORT 를 저장할 server_address 객체를 0으로 초기화 시킴*/
 	memset(&server_address, 0, sizeof(server_address));
@@ -32,12 +32,13 @@ int main()
 	bind(s_socket_fd, (struct sockaddr*) &server_address, sizeof(server_address)) ;
 	/*클라이언트의 접속을 기다리는 대기 모드로 전환*/
    listen(s_socket_fd, 5);
-   printf("기다려...\n");
+
 
 
    client_address_size = sizeof(client_address);
     /*클라이언트가 서버에 접속하면 접속을 수락함*/
    c_socket_fd = accept( s_socket_fd, (struct sockaddr*)&client_address, &client_address_size);
+
 
    printf("Client Connect!!!\n");
     /*클라이언트가 전달한 메시지를 읽어 들여서 fromClient에 대입*/

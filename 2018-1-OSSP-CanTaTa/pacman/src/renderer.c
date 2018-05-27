@@ -12,7 +12,7 @@
 
 //
 void draw_online_mode(int *s_c_num ,char* tmp);//#19 Kim : 2.menu.c 에있는거 열로 옮겼음
-void draw_wait_client();//#19 Kim : 2. 클라이언트 기다리는거 화면 추가.
+void draw_wait_client(const char tmp[]);//#19 Kim : 2. 클라이언트 기다리는거 화면 추가.
 
 //draws an image at a board coordinate
 void draw_image_coord(SDL_Surface *surface, int x, int y);
@@ -596,10 +596,10 @@ void draw_online_mode(int *s_c_num ,char* tmp)//#19 Kim : 1. 일단 메뉴에서
 		break;
 	}
 }
-void draw_wait_client()
-{
+void draw_wait_client(const char tmp[])
+{// #20 Kim : 1. 편하게 쓰기위해서 매개변수로 메세지 맘대로 할수있게
 	set_text_color(WhiteText);
-	draw_text_coord(get_screen(), "WAITING FOR OTEHR", 5, 15);
+	draw_text_coord(get_screen(), tmp, 4, 15);
 
 
 }
