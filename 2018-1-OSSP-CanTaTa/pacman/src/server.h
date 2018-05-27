@@ -1,5 +1,7 @@
 #include <sys/socket.h>
 
+#include <arpa/inet.h>
+#include <sys/types.h>
 #define PORT 32421
 #define BUFMAX 255
 

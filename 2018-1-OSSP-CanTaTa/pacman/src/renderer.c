@@ -10,6 +10,10 @@
 //#include "game.h"
 
 
+//
+void draw_online_mode(int *s_c_num ,char* tmp);//#19 Kim : 2.menu.c 에있는거 열로 옮겼음
+void draw_wait_client();//#19 Kim : 2. 클라이언트 기다리는거 화면 추가.
+
 //draws an image at a board coordinate
 void draw_image_coord(SDL_Surface *surface, int x, int y);
 void draw_image_coord_offset(SDL_Surface *surface, int x, int y, int xOffset, int yOffset);
@@ -569,3 +573,34 @@ void draw_board_flash(Board *board)
 		}
 	}
 }
+
+void draw_online_mode(int *s_c_num ,char* tmp)//#19 Kim : 1. 일단 메뉴에서 눌렀을때 들어가서 조작하는 화면 만들어보기
+{
+	set_text_color(WhiteText);
+	draw_text_coord(get_screen(), "MAKE ROOM", 10, 8);
+	draw_text_coord(get_screen(), "JOIN ROOM", 10, 13);
+	switch(*s_c_num)
+	{
+	case 0:
+		set_text_color(RedText);
+		draw_text_coord(get_screen(), "#", 8, 8);
+		draw_text_coord(get_screen(), "MAKE ROOM", 10, 8);
+		break;
+	case 1:
+		set_text_color(RedText);
+		draw_text_coord(get_screen(), "#", 8, 13);
+		draw_text_coord(get_screen(), "JOIN ROOM", 10, 13);
+		draw_text_coord(get_screen(), "WRITE SERVER IP", 7, 18);
+		set_text_color(WhiteText);
+		draw_text_coord(get_screen(), tmp, 7, 23	);
+		break;
+	}
+}
+void draw_wait_client()
+{
+	set_text_color(WhiteText);
+	draw_text_coord(get_screen(), "WAITING FOR OTEHR", 5, 15);
+
+
+}
+

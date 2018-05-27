@@ -8,7 +8,7 @@
 #include "ghost.h"
 #include "main.h"
 #include "renderer.h"
-
+#include "server.h"
 
 //time till ghost-rows start appearing
 #define GHOST_START 500
@@ -17,12 +17,10 @@
 #define GHOST_BETWEEN 500
 static char tmp[100]={"000.000"};
 static int index_num=0;
+static int s_c_num = 0;
 
-
-static int getKey();
 static void draw_vanity_screen(MenuSystem *menuSystem);
 static void draw_info_screen(void);
-static void draw_online_mode(MenuSystem *menuSystem);
 static void draw_ghost_line(GhostDisplayRow *row, int y, unsigned int dt);
 static void draw_player_info(void);
 
@@ -44,7 +42,8 @@ void menu_init(MenuSystem *menuSystem)
 //  메뉴에서  key up하면 -1  ,down 하면 1 . 아무것도 아니면 0
 int menu_tick(MenuSystem *menuSystem)
 {
-	bool startNew = key_held(SDLK_KP_ENTER) || key_held(SDLK_RETURN);
+	bool startNew = key_released(SDLK_KP_ENTER) || key_released(SDLK_RETURN);
+	//#19 Kim : 2. 엔터 누르면 keyHeld 라서 다음 장면에서도 엔터가 적용되어서 바로 넘어가버리는 버그 잡기위해 released 로 바꿈
 	if (startNew)
 	{
 		if(menuSystem->playMode==Online)
@@ -89,22 +88,8 @@ static void draw_vanity_screen(MenuSystem *menuSystem)
 	if (dt > 4000) draw_vanity_corporate_info();
 	if (dt > 5000) draw_vanity_animation(dt - 5000);
 }
-static void draw_online_mode(MenuSystem *menuSystem)//#19 Kim : 1. 일단 메뉴에서 눌렀을때 들어가서 조작하는 화면 만들어보기
-{
-	unsigned int dt = SDL_GetTicks() - menuSystem->ticksSinceModeChange;
 
-
-	if(getKey())
-		tmp[index_num++] = (char)getKey();
-
-	set_text_color(WhiteText);
-	draw_text_coord(get_screen(), "MAKE ROOM", 10, 8);
-	draw_text_coord(get_screen(), "JOIN ROOM", 10, 13);
-	draw_text_coord(get_screen(), "WRITE SERVER IP", 7, 18);
-	draw_text_coord(get_screen(), tmp, 7, 23	);
-
-}
-static int getKey()
+int getKey()
 {
 	for(int i = 48 ; i <=57 ; i ++)
 	{
@@ -113,15 +98,36 @@ static int getKey()
 	}
 	if(key_released(SDLK_PERIOD))
 		return '.';
-
+	else if(key_released(SDLK_UP))
+		return SDLK_UP;
+	else if(key_released(SDLK_DOWN))
+		return SDLK_DOWN;
+	else if(key_released(SDLK_KP_ENTER)||key_released(SDLK_RETURN))
+		return SDLK_KP_ENTER;
 	return 0;
 }
 
 void online_mode_render(MenuSystem *menuSystem)
 {
-
-		draw_online_mode(menuSystem);
-
+	int get= getKey();
+	if(get==SDLK_UP&&s_c_num==1)
+		{
+			s_c_num--;
+		}
+		else if(get==SDLK_DOWN&&s_c_num==0)
+		{
+			s_c_num++;
+		}
+		else if(s_c_num==1 && get>=48&&get<=57)
+			tmp[index_num++] = (char)get;
+		else if(get==SDLK_KP_ENTER)
+		{
+			if(s_c_num==0)//ROOM 만들 때
+			{
+				makeServer();
+			}
+		}
+		draw_online_mode(&s_c_num,tmp);
 }
 
 
