@@ -103,9 +103,12 @@ bool key_pressed(int keycode)
 
 bool key_released(int keycode)
 {
-	check_keycode(keycode);
+	check_keycode(keycode);//#19 : 1. 이 부분에서 키 값 계속 넘어가버려서 흠.. 체크 한뒤 false 바로만들기...
+	//안그러면 true 상태라 menu 에서 online 체크 후 바로 make room 들어가져버림
+	bool rt =keysReleasedFrame[keycode] == (curKeyFrame - 1);
+	keysReleasedFrame[keycode]=false;
 
-	return keysReleasedFrame[keycode] == (curKeyFrame - 1);
+	return rt;
 }
 
 #define max(a, b) (a) > (b) ? (a) : (b)

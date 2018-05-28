@@ -14,6 +14,7 @@
 #include "sound.h"
 #include "text.h"
 #include "window.h"
+#include "server.h"
 
 //Initializes all resources.
 static void resource_init(void);
@@ -95,7 +96,12 @@ static void internal_tick(void)
 			if (menuSystem.action == GoToGame)
 			{
 				state = Game;
+				pacmanGame.playMode=menuSystem.playMode;//#20 Kim : 1. 테스트용 으로 multi로 잠시
 				startgame_init();
+			}
+			else if(menuSystem.action == GoToJoin)
+			{
+				state = Join;
 			}
 
 			break;
@@ -112,6 +118,9 @@ static void internal_tick(void)
 			break;
 		case Intermission:
 			intermission_tick();
+			break;
+		case Join:
+
 			break;
 	}
 }
@@ -130,6 +139,10 @@ static void internal_render(void)
 			break;
 		case Intermission:
 			intermission_render();
+			break;
+		case Join:
+			if(online_mode_render(&menuSystem)==2)// #20 Kim : 1. 만약 접속 되었으면 state를 Menu로 바꿔줌
+				state=Menu;
 			break;
 	}
 
@@ -210,7 +223,7 @@ static void key_down_hacks(int keycode)
 	static bool rateSwitch = false;
 
 	//TODO: remove this hack and try make it work with the physics body
-	if (keycode == SDLK_SPACE) fps_sethz((rateSwitch = !rateSwitch) ? 200 : 60);
+	if (keycode == SDLK_SPACE) fps_sethz(60);//(rateSwitch = !rateSwitch) ? 200 : 60);// 버그 : 일단 ..뭐지흠.
 
 	if (keycode == SDLK_b) {
 		if(!pacmanGame.pacman[0].boostOn) {

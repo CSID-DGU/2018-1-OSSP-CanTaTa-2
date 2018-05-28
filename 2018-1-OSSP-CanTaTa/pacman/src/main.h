@@ -10,7 +10,8 @@ typedef enum
 {
 	Menu,
 	Game,
-	Intermission
+	Intermission,
+	Join// #19 Kim : 1. 방 만들고 들어가기 위한 새로운 State 추가.
 } ProgramState;
 
 //Returns the number of credits the user currently has.
