@@ -966,6 +966,7 @@ void game_object_function(GameObject *gameObject, PacmanGame *game, int playernu
 	//#26 Yang : 1.Godmode
 	case God:
 		game->pacman[playernum].godMode=true;
+		game->pacman[playernum].originDt = ticks_game();
 		game->pacman[playernum].body.velocity = 100;
 		game->pacman[playernum].boostOn = true;
 		return;
