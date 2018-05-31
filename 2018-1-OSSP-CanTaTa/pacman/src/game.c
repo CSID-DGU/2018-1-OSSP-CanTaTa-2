@@ -882,7 +882,7 @@ void level_init(PacmanGame *game)
 	pellets_init(&game->pelletHolder);
 
 	//reset ghosts
-	ghosts_init(game->ghosts);
+	ghosts_init(game->ghosts, game->currentLevel);
 
 	//reset fruit
 	reset_fruit(&game->gameFruit1, &game->board);
@@ -905,7 +905,7 @@ void pacdeath_init(PacmanGame *game,int player_num) //#14 Kim : 2. 이 부분도
 	//		pacman_level_init(&game->pacman[1]); //#8 Kim : 2.level도 흠...
 	//따라서 윗 부분은 필요 없게됨.
 	// #14 Kim : 2. 그리고 죽어도 계속 진행 되고 있는거니까  그냥 init , reset 부분 지우거
-	ghosts_init(game->ghosts);
+	ghosts_init(game->ghosts, game->currentLevel);
 	/*reset_fruit(&game->gameFruit1, &game->board);
 	reset_fruit(&game->gameFruit2, &game->board);
 	reset_fruit(&game->gameFruit3, &game->board);
@@ -981,7 +981,7 @@ void game_object_function_end(GameObject *gameObject, PacmanGame *game, int play
 	{
 	case Ghostslow:
 		for(int i=0;i<4;i++)
-			game->ghosts[i].body.velocity=80;
+			game->ghosts[i].body.velocity= ghost_speed_normal(game->currentLevel);
 	return;
 	case Life: return;
 	case God:

@@ -5,7 +5,7 @@
 #include <stdio.h>
 #include <time.h>
 
-void ghosts_init(Ghost ghosts[4])
+void ghosts_init(Ghost ghosts[4], int level)
 {
 	ghosts[0].ghostType = Blinky;
 	ghosts[1].ghostType = Inky;
@@ -14,13 +14,13 @@ void ghosts_init(Ghost ghosts[4])
 
 	for (int i = 0; i < 4; i++)
 	{
-		reset_ghost(&ghosts[i], ghosts[i].ghostType);
+		reset_ghost(&ghosts[i], ghosts[i].ghostType, level);
 	}
 
 	srand(time(NULL));
 }
 
-void reset_ghost(Ghost *ghost, GhostType type)
+void reset_ghost(Ghost *ghost, GhostType type, int level)
 {
 	int x, y;
 	int ox, oy;
@@ -46,7 +46,7 @@ void reset_ghost(Ghost *ghost, GhostType type)
 	ghost->body = (PhysicsBody) { x, y, ox, oy, dir, next, 100, 0, 0};
 	ghost->body.xOffsetInternal = 0;
 	ghost->body.yOffsetInternal = 0;
-	ghost->body.velocity = 80;
+	ghost->body.velocity = ghost_speed_normal(level);
 
 	ghost->movementMode = mode;
 	//ghost->movementMode = mode;
@@ -263,9 +263,12 @@ void execute_blue_logic(Ghost *blueGhost, Ghost *redGhost, Pacman *pacman)
 
 int ghost_speed_normal(int level)
 {
-	if (level == 1)  return 75;
-	if (level <= 4)  return 85;
-	if (level <= 20) return 95;
+	//#28 Yang: 2.난이도 조절 - 유령 속도 조절
+	switch(level){
+	case 1: return 60;
+	case 2: return 70;
+	case 3: case 4: return 80;
+	}
 	return 95;
 }
 int ghost_speed_fright(int level)

@@ -34,9 +34,9 @@ typedef struct
 	int isDead; // 0 = false, 1 = true, 2 = rebirth
 } Ghost;
 
-void ghosts_init(Ghost ghosts[4]);
+void ghosts_init(Ghost ghosts[4], int level); //#28 : Yang 2. 난이도 조절 - 유령 속도 조절
 
-void reset_ghost(Ghost *ghost, GhostType type);
+void reset_ghost(Ghost *ghost, GhostType type, int level);
 
 void execute_ghost_logic(Ghost *targetGhost, GhostType type, Ghost *redGhost, Pacman *pacman);
 
