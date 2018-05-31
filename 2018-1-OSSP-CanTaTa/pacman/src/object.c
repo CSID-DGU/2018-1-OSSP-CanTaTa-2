@@ -44,6 +44,8 @@ Object random_object()
 	switch(random){
 	case 0: return Ghostslow;
 	case 1: return Life;
+	//#26 Yang: 1.godmode
+	case 2: return God;
 	default : return Ghostslow;
 	}
 }

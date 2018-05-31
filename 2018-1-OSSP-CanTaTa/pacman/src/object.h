@@ -4,12 +4,13 @@
 #include "board.h"
 
 
-#define NUM_OBJECT 2
+#define NUM_OBJECT 3
 
 typedef enum
 {
 	Ghostslow,
-	Life		//#15 Yang : 1.생명 증가 object 추가
+	Life,
+	God//#15 Yang : 1.생명 증가 object 추가
 }Object;
 
 //Different modes a fruit can be in while in-game

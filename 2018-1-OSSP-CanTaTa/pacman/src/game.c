@@ -963,6 +963,12 @@ void game_object_function(GameObject *gameObject, PacmanGame *game, int playernu
 	case Life:
 		game->pacman[playernum].livesLeft++;
 		return;
+	//#26 Yang : 1.Godmode
+	case God:
+		game->pacman[playernum].godMode=true;
+		game->pacman[playernum].body.velocity = 100;
+		game->pacman[playernum].boostOn = true;
+		return;
 	default: return;
 	}
 }
@@ -975,6 +981,11 @@ void game_object_function_end(GameObject *gameObject, PacmanGame *game, int play
 			game->ghosts[i].body.velocity=80;
 	return;
 	case Life: return;
+	case God:
+			game->pacman[playernum].godMode=false;
+			game->pacman[playernum].body.velocity = 80;
+			game->pacman[playernum].boostOn = false;
+			return;
 	default : return;
 	}
 
