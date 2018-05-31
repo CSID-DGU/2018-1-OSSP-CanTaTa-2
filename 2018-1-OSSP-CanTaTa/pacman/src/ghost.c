@@ -282,3 +282,9 @@ int ghost_speed_tunnel(int level)
 	if (level <= 20) return 50;
 	return 50;
 }
+//#28 Yang : 1. 난이도 수정 - 레벨에 따른 고스트 수
+int ghost_number(int level)
+{
+	if(level == 1) return 3;
+	return 4;
+}

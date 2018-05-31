@@ -7,6 +7,7 @@
 #include "imageloader.h"
 #include "text.h"
 #include "window.h"
+#include "ghost.h"
 //#include "game.h"
 
 

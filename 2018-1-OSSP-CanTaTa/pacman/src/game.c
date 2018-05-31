@@ -15,6 +15,7 @@
 #include <stdlib.h>
 #include <time.h>
 #include "server.h"// #20 Kim : 1. 헤더 추가해주기
+#include "ghost.h"
 
 static void process_player(PacmanGame *game,int player_num);// #8 Kim 2. player num 추가
 static void process_fruit(PacmanGame *game, int player_num);//#5 Yang : 5. playernum 추가
@@ -201,7 +202,8 @@ void game_render(PacmanGame *game)
 			draw_pacman_static(&game->pacman[0]);// #8 Kim : 1.
 			if(game->playMode==Multi)// #13 Kim : 1. play Mode 에 따라서 추가
 				draw_pacman_static(&game->pacman[1]);// #8 Kim : 2. pacman 2도 그려보자~~
-			for (int i = 0; i < 4; i++) draw_ghost(&game->ghosts[i]);
+			//#28 Yang : 1.난이도 조절 ghost 수 조절
+			for(int i = 0; i < ghost_number(game->currentLevel); i++) draw_ghost(&game->ghosts[i]);
 
 			draw_large_pellets(&game->pelletHolder, false);
 			draw_board(&game->board);
@@ -210,7 +212,7 @@ void game_render(PacmanGame *game)
 			draw_pacman_static(&game->pacman[0]);// #8 Kim : 1.
 			if (game->playMode==Multi)
 				draw_pacman_static(&game->pacman[1]);
-			for (int i = 0; i < 4; i++) draw_ghost(&game->ghosts[i]);
+			for (int i = 0; i < ghost_number(game->currentLevel); i++) draw_ghost(&game->ghosts[i]);
 
 			draw_large_pellets(&game->pelletHolder, false);
 			draw_board(&game->board);
@@ -218,7 +220,7 @@ void game_render(PacmanGame *game)
 		case ReviveState2:
 			draw_pacman_static(&game->pacman[1]);// #8 Kim : 1.
 			draw_pacman_static(&game->pacman[0]);
-			for (int i = 0; i < 4; i++) draw_ghost(&game->ghosts[i]);
+			for (int i = 0; i < ghost_number(game->currentLevel); i++) draw_ghost(&game->ghosts[i]);
 
 			draw_large_pellets(&game->pelletHolder, false);
 			draw_board(&game->board);
@@ -250,7 +252,7 @@ void game_render(PacmanGame *game)
 				draw_pacman(&game->pacman[1]);
 
 			if(game->pacman[0].godMode == false) {
-				for (int i = 0; i < 4; i++) {
+				for (int i = 0; i < ghost_number(game->currentLevel); i++) {
 					if(game->ghosts[i].isDead == 1) {
 						draw_eyes(&game->ghosts[i]);
 					} else
@@ -263,7 +265,7 @@ void game_render(PacmanGame *game)
 					godChange = true;
 				}
 				godDt = ticks_game() - game->pacman[0].originDt;
-				for (int i = 0; i < 4; i++) {
+				for (int i = 0; i < ghost_number(game->currentLevel); i++) {
 					if(game->ghosts[i].isDead == 1) {
 						draw_eyes(&game->ghosts[i]);
 					} else if(draw_scared_ghost(&game->ghosts[i], godDt)){
@@ -285,7 +287,7 @@ void game_render(PacmanGame *game)
 
 			if (dt < 2000)
 			{
-				for (int i = 0; i < 4; i++) draw_ghost(&game->ghosts[i]);
+				for (int i = 0; i < ghost_number(game->currentLevel); i++) draw_ghost(&game->ghosts[i]);
 				draw_board(&game->board);
 			}
 			else
@@ -304,7 +306,7 @@ void game_render(PacmanGame *game)
 				draw_pacman_static(&game->pacman[0]);
 				if (game->playMode==Multi)// #14
 					draw_pacman_static(&game->pacman[1]);
-				for (int i = 0; i < 4; i++) draw_ghost(&game->ghosts[i]);
+				for (int i = 0; i < ghost_number(game->currentLevel); i++) draw_ghost(&game->ghosts[i]);
 			}
 			else
 			{
@@ -541,7 +543,7 @@ static void process_player(PacmanGame *game,int player_num)
 
 static void process_ghosts(PacmanGame *game)
 {
-	for (int i = 0; i < 4; i++)
+	for (int i = 0; i < ghost_number(game->currentLevel); i++)//#26 Yang : 1. 난이도 조절 - 고스트 수 조절
 	{
 		Ghost *g = &game->ghosts[i];
 
@@ -967,7 +969,7 @@ void game_object_function(GameObject *gameObject, PacmanGame *game, int playernu
 	case God:
 		game->pacman[playernum].godMode=true;
 		game->pacman[playernum].originDt = ticks_game();
-		game->pacman[playernum].body.velocity = 100;
+		game->pacman[playernum].body.velocity = 160;
 		game->pacman[playernum].boostOn = true;
 		return;
 	default: return;
