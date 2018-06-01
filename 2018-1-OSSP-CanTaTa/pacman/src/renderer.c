@@ -238,7 +238,17 @@ void draw_game_gameover(void)
 	set_text_color(RedText);
 	draw_text_coord(get_screen(), "GAME  OVER", 9, 20);
 }
-
+//#30 Yang :winner 표시 뷰
+void draw_game_playerone_win(void)
+{
+	set_text_color(RedText);
+	draw_text_coord(get_screen(), "PLAYER 1 WIN!", 7, 20);
+}
+void draw_game_playertwo_win(void)
+{
+	set_text_color(RedText);
+	draw_text_coord(get_screen(), "PLAYER 2 WIN!", 7, 20);
+}
 //
 //
 // Fruit renderering

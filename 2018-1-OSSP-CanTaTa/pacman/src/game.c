@@ -283,8 +283,10 @@ void game_render(PacmanGame *game)
 			}
 			break;
 		case WinState:
-			draw_pacman_static(&game->pacman[0]);
 
+			draw_pacman_static(&game->pacman[0]);
+			if(game->playMode==Multi) game->gameState=GameoverState;
+			else{
 			if (dt < 2000)
 			{
 				for (int i = 0; i < ghost_number(game->currentLevel); i++) draw_ghost(&game->ghosts[i]);
@@ -295,7 +297,7 @@ void game_render(PacmanGame *game)
 				//stop rendering the pen, and do the flash animation
 				draw_board_flash(&game->board);
 			}
-
+			}
 			break;
 		case DeathState: // #14 Kim : 2. 여기 통쨰로임 ㅇㅅㅇ
 			//draw everything the same for 1ish second
@@ -340,6 +342,16 @@ void game_render(PacmanGame *game)
 			break;
 
 		case GameoverState:
+			//#31 Yang : 점수로 승부판정모드 - 일단 멀티모드 자체를 점수 높으면 이기는 걸로 수정
+			if(game->playMode==Multi){
+				if(game->pacman[0].score>game->pacman[1].score&&game->pacman[0].livesLeft)
+					draw_game_playerone_win();
+				else if(game->pacman[0].score<game->pacman[1].score&&game->pacman[1].livesLeft)
+					draw_game_playertwo_win();
+				else if(game->pacman[0].livesLeft==0) draw_game_playertwo_win();
+				else draw_game_playerone_win();
+				break;
+			}
 			draw_game_gameover();
 			draw_board(&game->board);
 			draw_credits(num_credits());
@@ -359,9 +371,15 @@ static void enter_state(PacmanGame *game, GameState state)
 
 			break;
 		case WinState:
+			//#31 Yang : 점수 승부판정모드
+			if(game->playMode==Multi)
+			{
+				game->gameState=GameoverState;
+			}else{
 			game->currentLevel++;
 			game->gameState = LevelBeginState;
 			level_init(game);
+			}
 			break;
 		case DeathState:
 			// Player died and is starting a new game, subtract a life
