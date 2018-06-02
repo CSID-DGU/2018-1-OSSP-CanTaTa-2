@@ -108,7 +108,7 @@ void game_tick(PacmanGame *game)
 	if(game->playMode==Multi)
 		collidedWithGhost2 = check_pacghost_collision(game,1);
 	int lives1 = game->pacman[0].livesLeft;
-	//int lives2 = game->pacman[1].livesLeft;
+	int lives2 = game->pacman[1].livesLeft;
 
 	switch (game->gameState)
 	{
@@ -153,7 +153,7 @@ void game_tick(PacmanGame *game)
 		case DeathState2:
 			if (dt > 4000)
 			{
-				if (lives1 == 0) enter_state(game, GameoverState); //#
+				if (lives2 == 0) enter_state(game, GameoverState); //#8 Yang : 2p 라이프 0이되도 게임 끝나지 않는 부분 수정
 				else enter_state(game, ReviveState2);// #14 Kim : 2. ReviveState라는걸 추가해서 죽었을때 Level BeginState가 아니라 Revive로 가게했음
 			}
 				break;
