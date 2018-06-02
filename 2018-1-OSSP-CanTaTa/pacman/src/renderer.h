@@ -56,7 +56,9 @@ void draw_game_playerone_start(void);
 void draw_game_playertwo_start(void);
 void draw_game_ready(void);
 void draw_game_gameover(void);
-
+//#30 Yang :winner 표시 뷰
+void draw_game_playerone_win(void);
+void draw_game_playertwo_win(void);
 //
 // Fruit renderering
 //
@@ -85,7 +87,7 @@ void draw_large_pellets(PelletHolder *ph, bool flashing);
 void draw_pacman(Pacman *pacman);
 void draw_pacman_static(Pacman *pacman);
 void draw_pacman_death(Pacman *pacman, unsigned int timeSinceDeath);
-void draw_pacman_lives(int numLives);
+void draw_pacman_lives(int numLives1, int numLives2);
 
 //
 // Ghost rendering

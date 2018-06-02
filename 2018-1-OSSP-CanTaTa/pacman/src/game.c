@@ -15,6 +15,7 @@
 #include <stdlib.h>
 #include <time.h>
 #include "server.h"// #20 Kim : 1. 헤더 추가해주기
+#include "ghost.h"
 
 static void process_player(PacmanGame *game,int player_num);// #8 Kim 2. player num 추가
 static void process_fruit(PacmanGame *game, int player_num);//#5 Yang : 5. playernum 추가
@@ -106,7 +107,8 @@ void game_tick(PacmanGame *game)
 	bool collidedWithGhost2=false;
 	if(game->playMode==Multi)
 		collidedWithGhost2 = check_pacghost_collision(game,1);
-	int lives = game->pacman[0].livesLeft;
+	int lives1 = game->pacman[0].livesLeft;
+	int lives2 = game->pacman[1].livesLeft;
 
 	switch (game->gameState)
 	{
@@ -144,14 +146,14 @@ void game_tick(PacmanGame *game)
 		case DeathState:
 			if (dt > 4000)
 			{
-				if (lives == 0) enter_state(game, GameoverState);
+				if (lives1 == 0) enter_state(game, GameoverState);
 				else enter_state(game, ReviveState1);// #14 Kim : 2. ReviveState라는걸 추가해서 죽었을때 Level BeginState가 아니라 Revive로 가게했음
 			}
 			break;
 		case DeathState2:
 			if (dt > 4000)
 			{
-				if (lives == 0) enter_state(game, GameoverState);
+				if (lives2 == 0) enter_state(game, GameoverState); //#8 Yang : 2p 라이프 0이되도 게임 끝나지 않는 부분 수정
 				else enter_state(game, ReviveState2);// #14 Kim : 2. ReviveState라는걸 추가해서 죽었을때 Level BeginState가 아니라 Revive로 가게했음
 			}
 				break;
@@ -172,14 +174,16 @@ void game_render(PacmanGame *game)
 	static bool godChange = false;
 
 	//common stuff that is rendered in every mode:
-	// 1up + score, highscore, base board, lives, small pellets, fruit indicators
+	// 1up + score, highscore, base b록oard, lives, small pellets, fruit indicators
 	draw_common_oneup(true, game->pacman[0].score);// #8 Kim : 1.
+	if(game->playMode==Multi) draw_common_twoup(true, game->pacman[1].score);//#37 Yang: 2P UI 추가 - 점수 나오도록
 	draw_common_highscore(game->highscore);
-
-	draw_pacman_lives(game->pacman[0].livesLeft);// #8 Kim : 1. 2p도 추가해줘야할듯!
+	//#37 Yang :2P UI 추가 생명 나오도
+	if(game->playMode==Multi) draw_pacman_lives(game->pacman[0].livesLeft,game->pacman[1].livesLeft);
+	else draw_pacman_lives(game->pacman[0].livesLeft,0);// #8 Kim : 1. 2p도 추가해줘야할듯!
 
 	draw_small_pellets(&game->pelletHolder);
-	draw_fruit_indicators(game->currentLevel);
+	if(game->playMode!=Multi)draw_fruit_indicators(game->currentLevel);
 
 	//in gameover state big pellets don't render
 	//in gamebegin + levelbegin big pellets don't flash
@@ -201,7 +205,8 @@ void game_render(PacmanGame *game)
 			draw_pacman_static(&game->pacman[0]);// #8 Kim : 1.
 			if(game->playMode==Multi)// #13 Kim : 1. play Mode 에 따라서 추가
 				draw_pacman_static(&game->pacman[1]);// #8 Kim : 2. pacman 2도 그려보자~~
-			for (int i = 0; i < 4; i++) draw_ghost(&game->ghosts[i]);
+			//#28 Yang : 1.난이도 조절 ghost 수 조절
+			for(int i = 0; i < ghost_number(game->currentLevel); i++) draw_ghost(&game->ghosts[i]);
 
 			draw_large_pellets(&game->pelletHolder, false);
 			draw_board(&game->board);
@@ -210,7 +215,7 @@ void game_render(PacmanGame *game)
 			draw_pacman_static(&game->pacman[0]);// #8 Kim : 1.
 			if (game->playMode==Multi)
 				draw_pacman_static(&game->pacman[1]);
-			for (int i = 0; i < 4; i++) draw_ghost(&game->ghosts[i]);
+			for (int i = 0; i < ghost_number(game->currentLevel); i++) draw_ghost(&game->ghosts[i]);
 
 			draw_large_pellets(&game->pelletHolder, false);
 			draw_board(&game->board);
@@ -218,7 +223,7 @@ void game_render(PacmanGame *game)
 		case ReviveState2:
 			draw_pacman_static(&game->pacman[1]);// #8 Kim : 1.
 			draw_pacman_static(&game->pacman[0]);
-			for (int i = 0; i < 4; i++) draw_ghost(&game->ghosts[i]);
+			for (int i = 0; i < ghost_number(game->currentLevel); i++) draw_ghost(&game->ghosts[i]);
 
 			draw_large_pellets(&game->pelletHolder, false);
 			draw_board(&game->board);
@@ -250,7 +255,7 @@ void game_render(PacmanGame *game)
 				draw_pacman(&game->pacman[1]);
 
 			if(game->pacman[0].godMode == false) {
-				for (int i = 0; i < 4; i++) {
+				for (int i = 0; i < ghost_number(game->currentLevel); i++) {
 					if(game->ghosts[i].isDead == 1) {
 						draw_eyes(&game->ghosts[i]);
 					} else
@@ -263,7 +268,7 @@ void game_render(PacmanGame *game)
 					godChange = true;
 				}
 				godDt = ticks_game() - game->pacman[0].originDt;
-				for (int i = 0; i < 4; i++) {
+				for (int i = 0; i < ghost_number(game->currentLevel); i++) {
 					if(game->ghosts[i].isDead == 1) {
 						draw_eyes(&game->ghosts[i]);
 					} else if(draw_scared_ghost(&game->ghosts[i], godDt)){
@@ -281,11 +286,13 @@ void game_render(PacmanGame *game)
 			}
 			break;
 		case WinState:
-			draw_pacman_static(&game->pacman[0]);
 
+			draw_pacman_static(&game->pacman[0]);
+			if(game->playMode==Multi) game->gameState=GameoverState;
+			else{
 			if (dt < 2000)
 			{
-				for (int i = 0; i < 4; i++) draw_ghost(&game->ghosts[i]);
+				for (int i = 0; i < ghost_number(game->currentLevel); i++) draw_ghost(&game->ghosts[i]);
 				draw_board(&game->board);
 			}
 			else
@@ -293,7 +300,7 @@ void game_render(PacmanGame *game)
 				//stop rendering the pen, and do the flash animation
 				draw_board_flash(&game->board);
 			}
-
+			}
 			break;
 		case DeathState: // #14 Kim : 2. 여기 통쨰로임 ㅇㅅㅇ
 			//draw everything the same for 1ish second
@@ -304,7 +311,7 @@ void game_render(PacmanGame *game)
 				draw_pacman_static(&game->pacman[0]);
 				if (game->playMode==Multi)// #14
 					draw_pacman_static(&game->pacman[1]);
-				for (int i = 0; i < 4; i++) draw_ghost(&game->ghosts[i]);
+				for (int i = 0; i < ghost_number(game->currentLevel); i++) draw_ghost(&game->ghosts[i]);
 			}
 			else
 			{
@@ -338,6 +345,16 @@ void game_render(PacmanGame *game)
 			break;
 
 		case GameoverState:
+			//#31 Yang : 점수로 승부판정모드 - 일단 멀티모드 자체를 점수 높으면 이기는 걸로 수정
+			if(game->playMode==Multi){
+				if(game->pacman[0].score>game->pacman[1].score&&game->pacman[0].livesLeft)
+					draw_game_playerone_win();
+				else if(game->pacman[0].score<game->pacman[1].score&&game->pacman[1].livesLeft)
+					draw_game_playertwo_win();
+				else if(game->pacman[0].livesLeft==0) draw_game_playertwo_win();
+				else draw_game_playerone_win();
+				break;
+			}
 			draw_game_gameover();
 			draw_board(&game->board);
 			draw_credits(num_credits());
@@ -357,9 +374,15 @@ static void enter_state(PacmanGame *game, GameState state)
 
 			break;
 		case WinState:
+			//#31 Yang : 점수 승부판정모드
+			if(game->playMode==Multi)
+			{
+				game->gameState=GameoverState;
+			}else{
 			game->currentLevel++;
 			game->gameState = LevelBeginState;
 			level_init(game);
+			}
 			break;
 		case DeathState:
 			// Player died and is starting a new game, subtract a life
@@ -541,7 +564,7 @@ static void process_player(PacmanGame *game,int player_num)
 
 static void process_ghosts(PacmanGame *game)
 {
-	for (int i = 0; i < 4; i++)
+	for (int i = 0; i < ghost_number(game->currentLevel); i++)//#26 Yang : 1. 난이도 조절 - 고스트 수 조절
 	{
 		Ghost *g = &game->ghosts[i];
 
@@ -880,7 +903,7 @@ void level_init(PacmanGame *game)
 	pellets_init(&game->pelletHolder);
 
 	//reset ghosts
-	ghosts_init(game->ghosts);
+	ghosts_init(game->ghosts, game->currentLevel);
 
 	//reset fruit
 	reset_fruit(&game->gameFruit1, &game->board);
@@ -903,7 +926,7 @@ void pacdeath_init(PacmanGame *game,int player_num) //#14 Kim : 2. 이 부분도
 	//		pacman_level_init(&game->pacman[1]); //#8 Kim : 2.level도 흠...
 	//따라서 윗 부분은 필요 없게됨.
 	// #14 Kim : 2. 그리고 죽어도 계속 진행 되고 있는거니까  그냥 init , reset 부분 지우거
-	ghosts_init(game->ghosts);
+	ghosts_init(game->ghosts, game->currentLevel);
 	/*reset_fruit(&game->gameFruit1, &game->board);
 	reset_fruit(&game->gameFruit2, &game->board);
 	reset_fruit(&game->gameFruit3, &game->board);
@@ -963,6 +986,13 @@ void game_object_function(GameObject *gameObject, PacmanGame *game, int playernu
 	case Life:
 		game->pacman[playernum].livesLeft++;
 		return;
+	//#26 Yang : 1.Godmode
+	case God:
+		game->pacman[playernum].godMode=true;
+		game->pacman[playernum].originDt = ticks_game();
+		game->pacman[playernum].body.velocity = 160;
+		game->pacman[playernum].boostOn = true;
+		return;
 	default: return;
 	}
 }
@@ -972,9 +1002,14 @@ void game_object_function_end(GameObject *gameObject, PacmanGame *game, int play
 	{
 	case Ghostslow:
 		for(int i=0;i<4;i++)
-			game->ghosts[i].body.velocity=80;
+			game->ghosts[i].body.velocity= ghost_speed_normal(game->currentLevel);
 	return;
 	case Life: return;
+	case God:
+			game->pacman[playernum].godMode=false;
+			game->pacman[playernum].body.velocity = 80;
+			game->pacman[playernum].boostOn = false;
+			return;
 	default : return;
 	}
 
