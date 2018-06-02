@@ -41,7 +41,7 @@ static void internal_render(void);
 static void process_events(void);
 
 //Performs specific actions on various keypresses. Used for testing.
-static void key_down_hacks(int keycode);
+//static void key_down_hacks(int keycode); #38 : ip 칠때 0 이 같이 적용되어 주석처리 hack은 사실 필요없자나?
 
 static ProgramState state;
 static MenuSystem menuSystem;
@@ -202,7 +202,7 @@ static void process_events(void)
 				break;
 			case SDL_KEYDOWN:
 				handle_keydown(event.key.keysym.sym);
-				key_down_hacks(event.key.keysym.sym);
+				//key_down_hacks(event.key.keysym.sym); #38 : ip 칠때 0 이 같이 적용되어 주석처리 hack은 사실 필요없자나?
 
 				break;
 			case SDL_KEYUP:
@@ -215,7 +215,7 @@ static void process_events(void)
 	keyevents_finished();
 }
 
-static void key_down_hacks(int keycode)
+/*static void key_down_hacks(int keycode) #38 : ip 칠때 0 이 같이 적용되어 주석처리 hack은 사실 필요없자나?
 {// #8 Kim : 1.
 	if (keycode == SDLK_RETURN) pacmanGame.currentLevel++;
 	if (keycode == SDLK_BACKSPACE) menuSystem.ticksSinceModeChange = SDL_GetTicks();
@@ -256,7 +256,7 @@ static void key_down_hacks(int keycode)
 		printf("ghost speed: %d\n", pacmanGame.ghosts[0].body.velocity);
 	}
 }
-
+*/
 int num_credits(void)
 {
 	return numCredits;
