@@ -178,7 +178,7 @@ void draw_common_twoup(bool flashing, int score)
 
 	char scoreStr[256];
 	sprintf(scoreStr, "%01i", score);
-	draw_text_coord(get_screen(), scoreStr, 6 - int_length(score), 1);
+	draw_text_coord(get_screen(), scoreStr, 25 - int_length(score), 1);// #37 Ya록ng : 2P UI 추가 :점수보이도
 }
 
 void draw_common_highscore(int highscore)
@@ -457,17 +457,24 @@ void draw_pacman_death(Pacman *pacman, unsigned int dt)
 	draw_image_coord_offset(image, pacman->body.x, pacman->body.y, xOffset, yOffset);
 }
 
-void draw_pacman_lives(int numLives)
+void draw_pacman_lives(int numLives1, int numLives2)
 {
-	int x = 2 * 16;
+	int x1 = 2 * 16;
+	int x2 = 20*16;
 	int y = 34 * 16;
 
-	for (int i = 0; i < numLives; i++)
+	for (int i = 0; i < numLives1; i++)
 	{
-		apply_surface(x, y, pacman_life_image());
+		apply_surface(x1, y, pacman_life_image());
 
-		x += 16 * 2;
+		x1 += 16 * 2;
 	}
+	for (int i = 0; i < numLives2; i++)
+		{
+			apply_surface(x2, y, pacman_life_image());
+
+			x2 += 16 * 2;
+		}
 }
 
 //

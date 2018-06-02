@@ -107,7 +107,8 @@ void game_tick(PacmanGame *game)
 	bool collidedWithGhost2=false;
 	if(game->playMode==Multi)
 		collidedWithGhost2 = check_pacghost_collision(game,1);
-	int lives = game->pacman[0].livesLeft;
+	int lives1 = game->pacman[0].livesLeft;
+	//int lives2 = game->pacman[1].livesLeft;
 
 	switch (game->gameState)
 	{
@@ -145,14 +146,14 @@ void game_tick(PacmanGame *game)
 		case DeathState:
 			if (dt > 4000)
 			{
-				if (lives == 0) enter_state(game, GameoverState);
+				if (lives1 == 0) enter_state(game, GameoverState);
 				else enter_state(game, ReviveState1);// #14 Kim : 2. ReviveState라는걸 추가해서 죽었을때 Level BeginState가 아니라 Revive로 가게했음
 			}
 			break;
 		case DeathState2:
 			if (dt > 4000)
 			{
-				if (lives == 0) enter_state(game, GameoverState);
+				if (lives1 == 0) enter_state(game, GameoverState); //#
 				else enter_state(game, ReviveState2);// #14 Kim : 2. ReviveState라는걸 추가해서 죽었을때 Level BeginState가 아니라 Revive로 가게했음
 			}
 				break;
@@ -173,14 +174,16 @@ void game_render(PacmanGame *game)
 	static bool godChange = false;
 
 	//common stuff that is rendered in every mode:
-	// 1up + score, highscore, base board, lives, small pellets, fruit indicators
+	// 1up + score, highscore, base b록oard, lives, small pellets, fruit indicators
 	draw_common_oneup(true, game->pacman[0].score);// #8 Kim : 1.
+	if(game->playMode==Multi) draw_common_twoup(true, game->pacman[1].score);//#37 Yang: 2P UI 추가 - 점수 나오도록
 	draw_common_highscore(game->highscore);
-
-	draw_pacman_lives(game->pacman[0].livesLeft);// #8 Kim : 1. 2p도 추가해줘야할듯!
+	//#37 Yang :2P UI 추가 생명 나오도
+	if(game->playMode==Multi) draw_pacman_lives(game->pacman[0].livesLeft,game->pacman[1].livesLeft);
+	else draw_pacman_lives(game->pacman[0].livesLeft,0);// #8 Kim : 1. 2p도 추가해줘야할듯!
 
 	draw_small_pellets(&game->pelletHolder);
-	draw_fruit_indicators(game->currentLevel);
+	if(game->playMode!=Multi)draw_fruit_indicators(game->currentLevel);
 
 	//in gameover state big pellets don't render
 	//in gamebegin + levelbegin big pellets don't flash
