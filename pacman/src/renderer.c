@@ -592,6 +592,26 @@ void draw_board_flash(Board *board)
 	}
 }
 
+void draw_multi_mode(int *s_c_num) // # 9 Dong : 확장맵 테스트를 위한 메뉴 렌더
+{
+	set_text_color(WhiteText);
+	draw_text_coord(get_screen(), "SMALL MAP", 10, 8);
+	draw_text_coord(get_screen(), "LARGE MAP", 10, 13);
+	switch(*s_c_num)
+	{
+	case 0:
+		set_text_color(RedText);
+		draw_text_coord(get_screen(), "#", 8, 8);
+		draw_text_coord(get_screen(), "SMALL MAP", 10, 8);
+		break;
+	case 1:
+		set_text_color(RedText);
+		draw_text_coord(get_screen(), "#", 8, 13);
+		draw_text_coord(get_screen(), "LARGE MAP", 10, 13);
+		break;
+	}
+}
+
 void draw_online_mode(int *s_c_num ,char* tmp)//#19 Kim : 1. 일단 메뉴에서 눌렀을때 들어가서 조작하는 화면 만들어보기
 {
 	set_text_color(WhiteText);

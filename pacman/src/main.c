@@ -99,6 +99,10 @@ static void internal_tick(void)
 				pacmanGame.playMode=menuSystem.playMode;//#20 Kim : 1. 테스트용 으로 multi로 잠시
 				startgame_init();
 			}
+			else if(menuSystem.action == GoToMulti)
+			{
+				state = Joinmulti;
+			}
 			else if(menuSystem.action == GoToJoin)
 			{
 				state = Join;
@@ -120,7 +124,8 @@ static void internal_tick(void)
 			intermission_tick();
 			break;
 		case Join:
-
+			break;
+		case Joinmulti:
 			break;
 	}
 }
@@ -143,6 +148,12 @@ static void internal_render(void)
 		case Join:
 			if(online_mode_render(&menuSystem)==2)// #20 Kim : 1. 만약 접속 되었으면 state를 Menu로 바꿔줌
 				state=Menu;
+			break;
+		case Joinmulti:
+			if(multi_mode_render(&menuSystem)==2)// #20 Kim : 1. 만약 접속 되었으면 state를 Menu로 바꿔줌
+			{
+				state = Game;
+			}
 			break;
 	}
 

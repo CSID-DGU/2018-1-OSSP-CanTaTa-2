@@ -11,6 +11,7 @@ typedef enum
 	Menu,
 	Game,
 	Intermission,
+	Joinmulti, // # 9 Dong : 확장맵 사용을 위한 수정사항
 	Join// #19 Kim : 1. 방 만들고 들어가기 위한 새로운 State 추가.
 } ProgramState;
 
