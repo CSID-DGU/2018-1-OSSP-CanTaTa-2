@@ -26,10 +26,10 @@ static void draw_ghost_line(GhostDisplayRow *row, int y, unsigned int dt);
 static void draw_player_info(void);
 
 static GhostDisplayRow enemyRows[4] = {
-	{Blinky, "-SHADOW",  "\"BLINKY\"", RedText},
-	{Pinky,  "-SPEEDY",  "\"PINKY\"",  PinkText},
-	{Inky,   "-BASHFUL", "\"INKY\"",   CyanText},
-	{Clyde,  "-POKEY",   "\"CLYDE\"",  OrangeText}
+		{Blinky, "-SHADOW",  "\"BLINKY\"", RedText},
+		{Pinky,  "-SPEEDY",  "\"PINKY\"",  PinkText},
+		{Inky,   "-BASHFUL", "\"INKY\"",   CyanText},
+		{Clyde,  "-POKEY",   "\"CLYDE\"",  OrangeText}
 };
 
 void menu_init(MenuSystem *menuSystem)
@@ -108,7 +108,7 @@ int getKey(void)// #19 Kim : 1. 여기서 키값 받아서 와따가따리
 		return SDLK_KP_ENTER;// #19 Kim : 2. 엔터가 아니라 SDLK_RETURN 인듯. 엔터치면 ㅇㅅㅇ
 	else if(key_released(SDLK_PERIOD))
 		return SDLK_PERIOD;
-	return -1;
+	return 0;
 }
 
 int online_mode_render(MenuSystem *menuSystem)// #19 Kim : 2. 여기서 그려줌
@@ -119,42 +119,42 @@ int online_mode_render(MenuSystem *menuSystem)// #19 Kim : 2. 여기서 그려�
 		makeServer();
 		menuSystem->action=GoToGame;
 		menuSystem->playMode=Online_Server;// #12 Kim : 2. 잠시 테스트용
-		return 1;
+		return WaitClient;
 	}
 	else if(menuSystem->action==JoinServer)
 	{
 		connectServer(tmp);
 		menuSystem->action = GoToGame;
 		menuSystem->playMode = Online_Client;//#25 클라이언트쪽 접속하는 코드 추
-		return 2;
+		return JoinServer;
 	}
 	if(get==SDLK_UP&&s_c_num==1)
+	{
+		s_c_num--;
+	}
+	else if(get==SDLK_DOWN&&s_c_num==0)
+	{
+		s_c_num++;
+	}
+	else if(s_c_num==1 && ( (get>=48&&get<=57) ||get==SDLK_PERIOD)) //#25 닷 찍으면 문자열 들어가도록.
+		tmp[index_num++] = (char)get;
+	else if(get==SDLK_KP_ENTER)
+	{
+		if(s_c_num==0)//ROOM 만들 때
 		{
-			s_c_num--;
+			draw_input_string("WAITING CLIENT");// #19 Kim : 2. waiting client 그려줌 이름을 맞게 바꿔줌
+			menuSystem->action=WaitClient;
+			return 0;
 		}
-		else if(get==SDLK_DOWN&&s_c_num==0)
+		else if(s_c_num==1)
 		{
-			s_c_num++;
+			draw_input_string("CONNECT SERVER");
+			menuSystem->action = JoinServer;
+			return 0;
 		}
-		else if(s_c_num==1 && ( (get>=48&&get<=57) ||get==SDLK_PERIOD)) //#25 닷 찍으면 문자열 들어가도록.
-			tmp[index_num++] = (char)get;
-		else if(get==SDLK_KP_ENTER)
-		{
-			if(s_c_num==0)//ROOM 만들 때
-			{
-				draw_input_string("WAITING CLIENT");// #19 Kim : 2. waiting client 그려줌 이름을 맞게 바꿔줌
-				menuSystem->action=WaitClient;
-				return 0;
-			}
-			else if(s_c_num==1)
-			{
-				draw_input_string("CONNECT SERVER");
-				menuSystem->action = JoinServer;
-				return 0;
-			}
-		}
-		draw_online_mode(&s_c_num,tmp);
-		return 1;
+	}
+	draw_online_mode(&s_c_num,tmp);
+	return 1;
 }
 
 

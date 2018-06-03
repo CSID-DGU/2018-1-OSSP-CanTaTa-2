@@ -80,6 +80,7 @@ void draw_playMode(PlayMode playMode)//#13 : 2.메뉴 뷰 테스트중 일단 pe
 		draw_text_coord(get_screen(), "#", 8, 26);
 		draw_text_coord(get_screen(), "ONLINE", 10, 26);
 		break;
+	default :break;
 
 	}
 }
