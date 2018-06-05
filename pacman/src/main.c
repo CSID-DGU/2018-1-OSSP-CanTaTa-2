@@ -15,6 +15,7 @@
 #include "text.h"
 #include "window.h"
 #include "server.h"
+#include "client.h"
 
 //Initializes all resources.
 static void resource_init(void);
@@ -43,10 +44,12 @@ static void process_events(void);
 //Performs specific actions on various keypresses. Used for testing.
 //static void key_down_hacks(int keycode); #38 : ip 칠때 0 이 같이 적용되어 주석처리 hack은 사실 필요없자나?
 
+static void cp_pacman(PacmanGame *pac);
+
 static ProgramState state;
 static MenuSystem menuSystem;
 static PacmanGame pacmanGame;
-
+static PacmanGame* recvPac;
 static bool gameRunning = true;
 static int numCredits = 0;
 
@@ -80,47 +83,74 @@ static void internal_tick(void)
 	int up_down = 0;
 	switch (state)
 	{
-		case Menu:// #8 Kim : 2. menu_tick 에서 키 입력에 따라 up_down 값을 바꿔줌
+	case Menu:// #8 Kim : 2. menu_tick 에서 키 입력에 따라 up_down 값을 바꿔줌
 
-			up_down = menu_tick(&menuSystem);
+		up_down = menu_tick(&menuSystem);
 
-			if(pacmanGame.playMode==Single && up_down ==-1)//Single 이면서 up_down 이 -1 ( 즉 맨 위인데 다시 위로가기면 그대로 유지)
-				pacmanGame.playMode=Single;
-			else if (pacmanGame.playMode==Online&&up_down==1)//Online 이면서 up_down 이 1 (즉 맨 아래인데 다시 아래로가면 그대로 유지)
-				pacmanGame.playMode = Online;
-			else
-				pacmanGame.playMode+=up_down;//그 외는 그안에서 왔다갔다 하도록 함.
+		if(pacmanGame.playMode==Single && up_down ==-1)//Single 이면서 up_down 이 -1 ( 즉 맨 위인데 다시 위로가기면 그대로 유지)
+			pacmanGame.playMode=Single;
+		else if (pacmanGame.playMode==Online&&up_down==1)//Online 이면서 up_down 이 1 (즉 맨 아래인데 다시 아래로가면 그대로 유지)
+			pacmanGame.playMode = Online;
+		else
+			pacmanGame.playMode+=up_down;//그 외는 그안에서 왔다갔다 하도록 함.
 
-			menuSystem.playMode=pacmanGame.playMode; //#13 Kim : 이 부분에서 메뉴시스템한테 playMOde 전달~
+		menuSystem.playMode=pacmanGame.playMode; //#13 Kim : 이 부분에서 메뉴시스템한테 playMOde 전달~
 
-			if (menuSystem.action == GoToGame)
-			{
-				state = Game;
-				startgame_init();
-			}
-			else if(menuSystem.action == GoToJoin)
-			{
-				state = Join;
-			}
+		if (menuSystem.action == GoToGame)
+		{
+			state = Game;
+			startgame_init();
+		}
+		else if(menuSystem.action == GoToJoin)
+		{
+			state = Join;
+		}
 
-			break;
-		case Game:
+		break;
+	case Game:
+
+
+		if(menuSystem.playMode==Online_Server)
+		{
+			client_key key;
+
+			recv(c_socket_fd, (char*)&key, sizeof(key), MSG_WAITALL);
+			get_key(&key);
+
 			game_tick(&pacmanGame);
+			send(c_socket_fd, (char*)&pacmanGame, sizeof(PacmanGame),0);
 
-			if (is_game_over(&pacmanGame))
-			{
-				menu_init(&menuSystem);
-				state = Menu;
-				pacmanGame.playMode = Single;
-			}
+		}
+		else if(menuSystem.playMode==Online_Client)
+		{
+			client_key key;
+			insert_key(&key);
 
-			break;
-		case Intermission:
-			intermission_tick();
-			break;
-		case Join:
+			send(clientSocket, (char*)&key, sizeof(key),0);
 
-			break;
+			recvPac = (PacmanGame*)malloc(sizeof(PacmanGame));
+			recv(clientSocket, (char*)recvPac, sizeof(PacmanGame), MSG_WAITALL);
+
+			cp_pacman(recvPac);
+		}
+		else
+		{
+			game_tick(&pacmanGame);
+		}
+		if (is_game_over(&pacmanGame))
+		{
+			menu_init(&menuSystem);
+			state = Menu;
+			pacmanGame.playMode = Single;
+		}
+
+		break;
+	case Intermission:
+		intermission_tick();
+		break;
+	case Join:
+
+		break;
 	}
 }
 
@@ -130,28 +160,28 @@ static void internal_render(void)
 
 	switch (state)
 	{
-		case Menu:
-			menu_render(&menuSystem);
-			break;
-		case Game:
-			game_render(&pacmanGame);
-			break;
-		case Intermission:
-			intermission_render();
-			break;
-		case Join:
+	case Menu:
+		menu_render(&menuSystem);
+		break;
+	case Game:
+		game_render(&pacmanGame);
+		break;
+	case Intermission:
+		intermission_render();
+		break;
+	case Join:
 
-			switch(online_mode_render(&menuSystem))// #20 Kim : 1. 만약 접속 되었으면 state를 Menu로 바꿔줌
-			{
-			case JoinServer:case WaitClient:
-				pacmanGame.playMode= menuSystem.playMode;
-				state=Menu;
-				break;
-			default:
-				break;
-			}
-
+		switch(online_mode_render(&menuSystem))// #20 Kim : 1. 만약 접속 되었으면 state를 Menu로 바꿔줌
+		{
+		case JoinServer:case WaitClient:
+			pacmanGame.playMode= menuSystem.playMode;
+			state=Menu;
 			break;
+		default:
+			break;
+		}
+
+		break;
 	}
 
 	flip_screen();
@@ -204,19 +234,19 @@ static void process_events(void)
 	{
 		switch (event.type)
 		{
-			case SDL_QUIT:
-				gameRunning = false;
+		case SDL_QUIT:
+			gameRunning = false;
 
-				break;
-			case SDL_KEYDOWN:
-				handle_keydown(event.key.keysym.sym);
-				//key_down_hacks(event.key.keysym.sym); #38 : ip 칠때 0 이 같이 적용되어 주석처리 hack은 사실 필요없자나?
+			break;
+		case SDL_KEYDOWN:
+			handle_keydown(event.key.keysym.sym);
+			//key_down_hacks(event.key.keysym.sym); #38 : ip 칠때 0 이 같이 적용되어 주석처리 hack은 사실 필요없자나?
 
-				break;
-			case SDL_KEYUP:
-				handle_keyup(event.key.keysym.sym);
+			break;
+		case SDL_KEYUP:
+			handle_keyup(event.key.keysym.sym);
 
-				break;
+			break;
 		}
 	}
 
@@ -264,8 +294,27 @@ static void process_events(void)
 		printf("ghost speed: %d\n", pacmanGame.ghosts[0].body.velocity);
 	}
 }
-*/
+ */
 int num_credits(void)
 {
 	return numCredits;
+}
+
+
+static void cp_pacman(PacmanGame* pac)
+{
+
+
+	pacmanGame.gameState = pac->gameState;
+	pacmanGame.ticksSinceModeChange = pac->ticksSinceModeChange;
+	pacmanGame.highscore = pac->highscore;
+	pacmanGame.currentLevel = pac->currentLevel;
+	pacmanGame.pacman[0] = pac->pacman[0];
+	pacmanGame.pacman[1] = pac->pacman[1];
+	for(int i=0; i<4; i++) {
+		pacmanGame.ghosts[i] = pac->ghosts[i];
+	}
+
+
+
 }

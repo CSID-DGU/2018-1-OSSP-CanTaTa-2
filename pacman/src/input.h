@@ -33,5 +33,14 @@ bool key_held(int key);
 //Tests if the key was pressed this frame.
 bool key_pressed(int key);
 
+
+
+typedef struct{
+	bool keyHeld[4];
+	unsigned int keyPressed[4];
+}client_key; // #25 : 클라이언트의 키를 받기 위한 구조체
+
 //Tests if the key was released this frame.
 bool key_released(int key);
+void get_key(client_key *key);
+void insert_key(client_key *key);
