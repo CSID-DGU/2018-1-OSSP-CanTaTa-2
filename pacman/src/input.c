@@ -14,8 +14,10 @@ static unsigned int keysReleasedFrame[MAX_KEYS] = {0};
 
 //#25 클라이언트의 키 를 받는곳을 따로 만들어야할 듯?
 static bool Client_keysHeld[MAX_KEYS] = {false};
+
 static unsigned int Client_keysPressedFrame[MAX_KEYS] = {0};
 static unsigned int Client_keysReleasedFrame[MAX_KEYS] = {0};
+static int Client_frame_for_direction(Direction dir);
 
 static unsigned int curKeyFrame = 1;
 void get_key(client_key *key);
@@ -71,6 +73,23 @@ bool dir_key_held(Direction direction,int player_num)
 	exit(1);
 }
 
+//#25 클라이언트 키 따로 받아서 하기위해 ..
+//원래는 로컬에서 할 때는 같은 함수에서 if문으로 player num 떄려박아넣었는데.
+//여기서 key를 따로 해줘야 server에서 wasd 로 조정했을때 2p가 움직여버리는 일이 안일어남
+bool Client_dir_key_held(Direction direction)
+{
+	switch (direction)
+	{
+		case Up:    return Client_keysHeld[SDLK_UP];
+		case Down:  return Client_keysHeld[SDLK_DOWN];
+		case Left:  return Client_keysHeld[SDLK_LEFT];
+		case Right: return Client_keysHeld[SDLK_RIGHT];
+	}
+
+	printf("should never reach here\n");
+	exit(1);
+}
+
 bool dir_pressed_now(Direction *dir,int player_num)
 {
 	int highestPushed = 0;
@@ -92,6 +111,32 @@ bool dir_pressed_now(Direction *dir,int player_num)
 
 	return highestPushed != 0;
 }
+
+//#25 클라이언트 키 따로 받아서 하기위해 ..
+//원래는 로컬에서 할 때는 같은 함수에서 if문으로 player num 떄려박아넣었는데.
+//여기서 key를 따로 해줘야 server에서 wasd 로 조정했을때 2p가 움직여버리는 일이 안일어남
+bool Client_dir_pressed_now(Direction *dir)
+{
+	int highestPushed = 0;
+	Direction dirs[4] = {Up, Left, Down, Right};
+
+	for (int i = 3; i >= 0; i--)
+	{
+		if (!Client_dir_key_held(dirs[i])) continue;
+
+		int x = Client_frame_for_direction(dirs[i]);
+
+		if (x > highestPushed)
+		{
+			*dir = dirs[i];
+			highestPushed = x;
+		}
+	}
+
+	return highestPushed != 0;
+}
+
+
 
 bool key_held(int keycode)
 {
@@ -133,6 +178,21 @@ static int frame_for_direction(Direction dir)
 	printf("should never reach here\n");
 	exit(1);
 }
+
+static int Client_frame_for_direction(Direction dir)
+{
+	switch (dir)
+	{
+		case Up:    return Client_keysPressedFrame[SDLK_UP];
+		case Down:  return Client_keysPressedFrame[SDLK_DOWN];
+		case Left:  return Client_keysPressedFrame[SDLK_LEFT];
+		case Right: return Client_keysPressedFrame[SDLK_RIGHT];
+	}
+
+	printf("should never reach here\n");
+	exit(1);
+}
+
 
 static void check_keycode(int keycode)
 {
