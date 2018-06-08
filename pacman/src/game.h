@@ -34,7 +34,9 @@ typedef enum {
 typedef enum{
 	Single,
 	Multi,
-	Online
+	Online,
+	Online_Server,
+	Online_Client
 }PlayMode;
 typedef struct {
 	GameState gameState;

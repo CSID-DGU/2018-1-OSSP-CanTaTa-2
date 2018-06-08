@@ -14,6 +14,7 @@ int object_points(Object object)
 	{
 		case Ghostslow:     return 100;
 		case Life: 			return 100;
+		default : return 0;
 	}
 
 	printf("invalid object\naborting\n");
