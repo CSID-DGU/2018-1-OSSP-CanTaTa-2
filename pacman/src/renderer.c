@@ -13,7 +13,7 @@
 
 //
 void draw_online_mode(int *s_c_num ,char* tmp);//#19 Kim : 2.menu.c 에있는거 열로 옮겼음
-void draw_wait_client(const char tmp[]);//#19 Kim : 2. 클라이언트 기다리는거 화면 추가.
+void draw_input_string(const char tmp[]);//#19 Kim : 2. 클라이언트 기다리는거 화면 추가. 이름을 맞게 바꿔줌
 
 //draws an image at a board coordinate
 void draw_image_coord(SDL_Surface *surface, int x, int y);
@@ -80,6 +80,7 @@ void draw_playMode(PlayMode playMode)//#13 : 2.메뉴 뷰 테스트중 일단 pe
 		draw_text_coord(get_screen(), "#", 8, 26);
 		draw_text_coord(get_screen(), "ONLINE", 10, 26);
 		break;
+	default :break;
 
 	}
 }
@@ -634,7 +635,7 @@ void draw_online_mode(int *s_c_num ,char* tmp)//#19 Kim : 1. 일단 메뉴에서
 		break;
 	}
 }
-void draw_wait_client(const char tmp[])
+void draw_input_string(const char tmp[])
 {// #20 Kim : 1. 편하게 쓰기위해서 매개변수로 메세지 맘대로 할수있게
 	set_text_color(WhiteText);
 	draw_text_coord(get_screen(), tmp, 4, 15);

@@ -50,8 +50,10 @@ void game_tick(PacmanGame *game)
 			// everyone can move and this is the standard 'play' game mode
 			//#8 2. player 두개로 늘림
 			process_player(game,0);
-			if(game->playMode==Multi)// #13 Kim : 1. play Mode 에 따라서 추가
+			if(game->playMode!=Single)// #13 Kim : 1. play Mode 에 따라서 추가
 				process_player(game,1);
+
+
 			process_ghosts(game);
 
 			process_fruit(game,0);
@@ -60,13 +62,13 @@ void game_tick(PacmanGame *game)
 			//#8 3. collusion pellet check 2개로
 			process_pellets(game,0);
 
-			if(game->playMode==Multi){// #13 Kim : 1. play Mode 에 따라서 추가
+			if(game->playMode!=Single){// #13 Kim : 1. play Mode 에 따라서 추가
 				process_pellets(game,1);
 				process_object(game,1);//#5 Yang : 5. 2p일 때 변수추
 				process_fruit(game,1);
 			}
 			if (game->pacman[0].score > game->highscore ) game->highscore = game->pacman[0].score;// #8 Kim : 1.
-			if(game->playMode==Multi)// #13 Kim : 1. play Mode 에 따라서 추가
+			if(game->playMode!=Single)// #13 Kim : 1. play Mode 에 따라서 추가
 				if (game->pacman[1].score > game->highscore ) game->highscore = game->pacman[1].score;// #8 Kim : 2. 만약 p2가 최고점수면 ㅇㅇ
 
 			break;
@@ -105,7 +107,7 @@ void game_tick(PacmanGame *game)
 	bool allPelletsEaten = game->pelletHolder.numLeft == 0;
 	bool collidedWithGhost = check_pacghost_collision(game,0);	//#14 Kim : 1. 흠 어케하지 이거를. 일단 player 선택하여 넣도록 추가해보도록 함
 	bool collidedWithGhost2=false;
-	if(game->playMode==Multi)
+	if(game->playMode!=Single)
 		collidedWithGhost2 = check_pacghost_collision(game,1);
 	int lives1 = game->pacman[0].livesLeft;
 	int lives2 = game->pacman[1].livesLeft;
@@ -135,7 +137,7 @@ void game_tick(PacmanGame *game)
 
 			else if (allPelletsEaten) enter_state(game, WinState);
 			else if (collidedWithGhost) enter_state(game, DeathState);//#14 일단 이때. 열로 들어가는데... 현제 스테이트는 GamePlayState고..
-			if(game->playMode==Multi&&collidedWithGhost2)enter_state(game,DeathState2);//#14 Kim : 2. 2p가 죽었을때는 DeathState2로 간다.
+			if(game->playMode!=Single&&collidedWithGhost2)enter_state(game,DeathState2);//#14 Kim : 2. 2p가 죽었을때는 DeathState2로 간다.
 
 			break;
 		case WinState:
@@ -176,10 +178,10 @@ void game_render(PacmanGame *game)
 	//common stuff that is rendered in every mode:
 	// 1up + score, highscore, base b록oard, lives, small pellets, fruit indicators
 	draw_common_oneup(true, game->pacman[0].score);// #8 Kim : 1.
-	if(game->playMode==Multi) draw_common_twoup(true, game->pacman[1].score);//#37 Yang: 2P UI 추가 - 점수 나오도록
+	if(game->playMode!=Single) draw_common_twoup(true, game->pacman[1].score);//#37 Yang: 2P UI 추가 - 점수 나오도록
 	draw_common_highscore(game->highscore);
 	//#37 Yang :2P UI 추가 생명 나오도
-	if(game->playMode==Multi) draw_pacman_lives(game->pacman[0].livesLeft,game->pacman[1].livesLeft);
+	if(game->playMode!=Single) draw_pacman_lives(game->pacman[0].livesLeft,game->pacman[1].livesLeft);
 	else draw_pacman_lives(game->pacman[0].livesLeft,0);// #8 Kim : 1. 2p도 추가해줘야할듯!
 
 	draw_small_pellets(&game->pelletHolder);
@@ -203,7 +205,7 @@ void game_render(PacmanGame *game)
 
 			//we also draw pacman and ghosts (they are idle currently though)
 			draw_pacman_static(&game->pacman[0]);// #8 Kim : 1.
-			if(game->playMode==Multi)// #13 Kim : 1. play Mode 에 따라서 추가
+			if(game->playMode!=Single)// #13 Kim : 1. play Mode 에 따라서 추가
 				draw_pacman_static(&game->pacman[1]);// #8 Kim : 2. pacman 2도 그려보자~~
 			//#28 Yang : 1.난이도 조절 ghost 수 조절
 			for(int i = 0; i < ghost_number(game->currentLevel); i++) draw_ghost(&game->ghosts[i]);
@@ -213,7 +215,7 @@ void game_render(PacmanGame *game)
 			break;
 		case ReviveState1://#14 Kim : 2. ghost collision 후의 그냥 계속 진행 하게끔!!
 			draw_pacman_static(&game->pacman[0]);// #8 Kim : 1.
-			if (game->playMode==Multi)
+			if (game->playMode!=Single)
 				draw_pacman_static(&game->pacman[1]);
 			for (int i = 0; i < ghost_number(game->currentLevel); i++) draw_ghost(&game->ghosts[i]);
 
@@ -251,7 +253,7 @@ void game_render(PacmanGame *game)
 			// #8 Kim : 1.
 			draw_pacman(&game->pacman[0]);
 			// #8 Kim : 2.
-			if(game->playMode==Multi)// #13 Kim : 1. play Mode 에 따라서 추가
+			if(game->playMode!=Single)// #13 Kim : 1. play Mode 에 따라서 추가
 				draw_pacman(&game->pacman[1]);
 
 			if(game->pacman[0].godMode == false) {
@@ -288,7 +290,7 @@ void game_render(PacmanGame *game)
 		case WinState:
 
 			draw_pacman_static(&game->pacman[0]);
-			if(game->playMode==Multi) game->gameState=GameoverState;
+			if(game->playMode!=Single) game->gameState=GameoverState;
 			else{
 			if (dt < 2000)
 			{
@@ -309,7 +311,7 @@ void game_render(PacmanGame *game)
 				//draw everything normally
 				//TODO: this actually draws the last frame pacman was on when he died
 				draw_pacman_static(&game->pacman[0]);
-				if (game->playMode==Multi)// #14
+				if (game->playMode!=Single)// #14
 					draw_pacman_static(&game->pacman[1]);
 				for (int i = 0; i < ghost_number(game->currentLevel); i++) draw_ghost(&game->ghosts[i]);
 			}
@@ -317,7 +319,7 @@ void game_render(PacmanGame *game)
 			{
 				//draw the death animation
 				draw_pacman_death(&game->pacman[0], dt - 500);
-				if(game->playMode==Multi)//#14
+				if(game->playMode!=Single)//#14
 					draw_pacman_static(&game->pacman[1]);
 			}
 			//#14 Kim : 2. 이 부분에서 ~ pac맨 그려준다요 그래서 부딪히고 죽는 모션에서 다른 플레이어도 출력하게끔 했음
@@ -346,7 +348,7 @@ void game_render(PacmanGame *game)
 
 		case GameoverState:
 			//#31 Yang : 점수로 승부판정모드 - 일단 멀티모드 자체를 점수 높으면 이기는 걸로 수정
-			if(game->playMode==Multi){
+			if(game->playMode!=Single){
 				if(game->pacman[0].score>game->pacman[1].score&&game->pacman[0].livesLeft)
 					draw_game_playerone_win();
 				else if(game->pacman[0].score<game->pacman[1].score&&game->pacman[1].livesLeft)
@@ -369,13 +371,13 @@ static void enter_state(PacmanGame *game, GameState state)
 	{
 		case GameBeginState:
 			game->pacman[0].livesLeft--;
-			if (game->playMode==Multi)
+			if (game->playMode!=Single)
 				game->pacman[1].livesLeft--;//#14 Kim : 2. Player_num 없애고 그냥 이거로 대체
 
 			break;
 		case WinState:
 			//#31 Yang : 점수 승부판정모드
-			if(game->playMode==Multi)
+			if(game->playMode!=Single)
 			{
 				game->gameState=GameoverState;
 			}else{
@@ -479,10 +481,13 @@ static void process_player(PacmanGame *game,int player_num)
 
 	Direction newDir;
 
-	get_client_position();//#20 Kim : 여기서 상대 위치 받을 까 생각중임
-
-
-	bool dirPressed = dir_pressed_now(&newDir,player_num);//#8 Kim : 2.플레이어마다 키가 달라짐.
+	bool dirPressed;
+	if(player_num==1&&game->playMode==Online_Server)
+	{
+		dirPressed = Client_dir_pressed_now(&newDir,player_num);
+	}
+	else
+		dirPressed = dir_pressed_now(&newDir,player_num);//#8 Kim : 2.플레이어마다 키가 달라짐.
 
 	if (dirPressed)
 	{
@@ -882,7 +887,7 @@ void gamestart_init(PacmanGame *game)
 
 	pacman_init(&game->pacman[0]);
 	// #8 Kim : 2. pacman init 부분도 추가
-	if(game->playMode==Multi)// #13 Kim : 1. play Mode 에 따라서 추가
+	if(game->playMode!=Single)// #13 Kim : 1. play Mode 에 따라서 추가
 		pacman_init(&game->pacman[1]);
 	//we need to reset all fruit
 	//fuit_init();
@@ -922,7 +927,7 @@ void level_init(PacmanGame *game)
 void pacdeath_init(PacmanGame *game,int player_num) //#14 Kim : 2. 이 부분도 어떤 팩맨이 죽었는지 추가해줘야할듯 했지만 사실 필요는 없는듯.. 흠..여기서 점수관련한걸 해줘야하나
 {
 	//pacman_level_init(&game->pacman[player_num]);
-	//	if(game->playMode==Multi)// #13 Kim : 1. play Mode 에 따라서 추가
+	//	if(game->playMode!=Single)// #13 Kim : 1. play Mode 에 따라서 추가
 	//		pacman_level_init(&game->pacman[1]); //#8 Kim : 2.level도 흠...
 	//따라서 윗 부분은 필요 없게됨.
 	// #14 Kim : 2. 그리고 죽어도 계속 진행 되고 있는거니까  그냥 init , reset 부분 지우거
