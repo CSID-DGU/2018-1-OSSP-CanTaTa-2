@@ -49,12 +49,15 @@ static void cp_pacman(PacmanGame *pac);
 static ProgramState state;
 static MenuSystem menuSystem;
 static PacmanGame pacmanGame;
+
 static PacmanGame* recvPac;
+
 static bool gameRunning = true;
 static int numCredits = 0;
 
 int main(void)
 {
+	recvPac = (PacmanGame*)malloc(sizeof(PacmanGame));
 	resource_init();
 	game_init();
 
@@ -67,6 +70,7 @@ int main(void)
 
 static void main_loop(void)
 {
+	recvPac = (PacmanGame*)malloc(sizeof(PacmanGame));
 	while (gameRunning && !key_held(SDLK_ESCAPE))
 	{
 		process_events();
@@ -128,7 +132,7 @@ static void internal_tick(void)
 
 			send(clientSocket, (char*)&key, sizeof(key),0);
 
-			recvPac = (PacmanGame*)malloc(sizeof(PacmanGame));
+
 			recv(clientSocket, (char*)recvPac, sizeof(PacmanGame), MSG_WAITALL);
 
 			cp_pacman(recvPac);
@@ -301,9 +305,18 @@ int num_credits(void)
 }
 
 
+
+static void cp_pellet(Pellet* a,Pellet* b)
+{
+	a->eaten = b->eaten;
+	//a->image = b->image;
+	a->type = b->type;
+	a->x = b->x;
+	a->y = b->y;
+}
+
 static void cp_pacman(PacmanGame* pac)
 {
-
 
 	pacmanGame.gameState = pac->gameState;
 	pacmanGame.ticksSinceModeChange = pac->ticksSinceModeChange;
@@ -314,7 +327,23 @@ static void cp_pacman(PacmanGame* pac)
 	for(int i=0; i<4; i++) {
 		pacmanGame.ghosts[i] = pac->ghosts[i];
 	}
+	pacmanGame.pelletHolder.numLeft = pac->pelletHolder.numLeft;
+	pacmanGame.pelletHolder.totalNum = pac->pelletHolder.totalNum;
+	for(int i = 0 ; i <243; i++)
+	{
+		cp_pellet(&pacmanGame.pelletHolder.pellets[i],&pac->pelletHolder.pellets[i]);
+	}
 
+	pacmanGame.gameFruit1=pac->gameFruit1;
+	pacmanGame.gameFruit2=pac->gameFruit2;
+	pacmanGame.gameFruit3=pac->gameFruit3;
+	pacmanGame.gameFruit4=pac->gameFruit4;
+	pacmanGame.gameFruit5=pac->gameFruit5;
+	pacmanGame.gameObject1=pac->gameObject1;
+	pacmanGame.gameObject2=pac->gameObject2;
+	pacmanGame.gameObject3=pac->gameObject3;
+	pacmanGame.gameObject4=pac->gameObject4;
+	pacmanGame.gameObject5=pac->gameObject5;
 
 
 }

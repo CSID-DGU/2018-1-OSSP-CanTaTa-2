@@ -10,7 +10,7 @@
 void connectServer(char* ip)  {
 
 	int str_len;
-	/*서버에 접속해서 데이터를 입출력 하는 클라이언트 소켓생성*/
+	/*서버에 접속해서 데이터를 입출력 하는 클라이	언트 소켓생성*/
 	clientSocket=socket(PF_INET, SOCK_STREAM, 0);
 	printf("Create Client Socket\n");
 	/*서버의 주소 정보가 저장될 server_adress 를 0으로 초기화*/
@@ -25,25 +25,3 @@ void connectServer(char* ip)  {
 	/*toServer 에 저장된 메시지를 서버로 전송*/
 }
 
-
-void get_server_position(void)
-{
-	 /* 입력 받을 버퍼 생성  */
-	 char message[255];
-	 memset(message,0,strlen(message));
-	 /* 사용자로부터 입력 받음 */
-
-	 message[0]='o';
-	 message[1]='\0';
-
-	 /* 입력 받은 문자 센드 */
-	 size_t echoStringLen = strlen(message);
-	 ssize_t numBytes = send (clientSocket,message, echoStringLen, 0);
-	 /* 입력 받은 문자가 /quit 일 경우 브레이크 */
-	 /* 서버측으로부터 리시브  */
-	 char buffer[255];
-	 memset(buffer,0,sizeof(buffer));
-	 numBytes = recv(clientSocket,buffer,255,0);
-	 memset(buffer,0,sizeof(buffer));
-
-}
