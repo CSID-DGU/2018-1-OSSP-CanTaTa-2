@@ -263,19 +263,35 @@ void draw_fruit_indicators(int currentLevel)
 		printf("invalid level number for drawing fruit: %d\naborting\n", currentLevel);
 		exit(1);
 	}
-
-	int x = 26 * 16;
-	int y = 34 * 16;
-
-	int index = currentLevel > 7 ? 7 : currentLevel;
-
-	for (int i = index; i > 0; i--)
+	if(Multi_flags() == 1) // # 9 Dong : 2P 맵 추가를 위한 수정
 	{
-		Fruit fruit = fruit_for_level(currentLevel - (index - i));
-		SDL_Surface *image = get_fruit_image(fruit);
+		int x = 54 * 16;
+		int y = 34 * 16;
+		int index = currentLevel > 7 ? 7 : currentLevel;
 
-		apply_surface(x - i * 16 * 2, y, image);
+		for (int i = index; i > 0; i--)
+		{
+			Fruit fruit = fruit_for_level(currentLevel - (index - i));
+			SDL_Surface *image = get_fruit_image(fruit);
+
+			apply_surface(x - i * 16 * 2, y, image);
+		}
 	}
+	else
+	{
+		int x = 26 * 16;
+		int y = 34 * 16;
+		int index = currentLevel > 7 ? 7 : currentLevel;
+
+		for (int i = index; i > 0; i--)
+		{
+			Fruit fruit = fruit_for_level(currentLevel - (index - i));
+			SDL_Surface *image = get_fruit_image(fruit);
+
+			apply_surface(x - i * 16 * 2, y, image);
+		}
+	}
+
 }
 
 //Draws the fruit in the middle of the level.
@@ -297,10 +313,10 @@ void draw_object_indicator(int currentLevel)
 			printf("invalid level number for drawing fruit: %d\naborting\n", currentLevel);
 			exit(1);
 		}
-
-		int x = 26 * 16;
+	if(Multi_flags() == 1) // # 9 Dong : 2P 맵 추가를 위한 수정
+	{
+		int x = 54 * 16;
 		int y = 34 * 16;
-
 		int index = currentLevel > 7 ? 7 : currentLevel;
 
 		for (int i = index; i > 0; i--)
@@ -310,6 +326,21 @@ void draw_object_indicator(int currentLevel)
 
 			apply_surface(x - i * 16 * 2, y, image);
 		}
+	}
+	else
+	{
+		int x = 26 * 16;
+		int y = 34 * 16;
+		int index = currentLevel > 7 ? 7 : currentLevel;
+
+		for (int i = index; i > 0; i--)
+		{
+			Object object = random_object();
+			SDL_Surface *image = get_object_image(object);
+
+			apply_surface(x - i * 16 * 2, y, image);
+		}
+	}
 }
 void draw_object_game (int curruntLevel, GameObject *gameObject)
 {
@@ -568,11 +599,24 @@ void draw_ghost_pts(GameFruit *gameFruit)
 
 void draw_board(Board *board)
 {
-	for (int y = 0; y < BOARD_HEIGHT; y++)
+	if(Multi_flags() == 1) // #9 Dong : 2p 맵 연동
 	{
-		for (int x = 0; x < BOARD_LENGTH; x++)
+		for (int y = 0; y < BOARD_HEIGHT; y++)
 		{
-			apply_surface(x * 16, offset + y * 16, (board->boardSquares[x][y]).image);
+			for (int x = 0; x < 56; x++)
+			{
+				apply_surface(x * 16, offset + y * 16, (board->boardSquares[x][y]).image);
+			}
+		}
+	}
+	else
+	{
+		for (int y = 0; y < BOARD_HEIGHT; y++)
+		{
+			for (int x = 0; x < 28; x++)
+			{
+				apply_surface(x * 16, offset + y * 16, (board->boardSquares[x][y]).image);
+			}
 		}
 	}
 }
@@ -584,11 +628,24 @@ void draw_board_flash(Board *board)
 	//TODO: make this draw the different colored board instead of just not drawing
 	if (animate) return;
 
-	for (int y = 0; y < BOARD_HEIGHT; y++)
+	if(Multi_flags() == 1) // #9 Dong : 2p 맵 연동
 	{
-		for (int x = 0; x < BOARD_LENGTH; x++)
+		for (int y = 0; y < BOARD_HEIGHT; y++)
 		{
-			apply_surface(x * 16, offset + y * 16, (board->boardSquares[x][y]).image);
+			for (int x = 0; x < 56; x++)
+			{
+				apply_surface(x * 16, offset + y * 16, (board->boardSquares[x][y]).image);
+			}
+		}
+	}
+	else
+	{
+		for (int y = 0; y < BOARD_HEIGHT; y++)
+		{
+			for (int x = 0; x < 28; x++)
+			{
+				apply_surface(x * 16, offset + y * 16, (board->boardSquares[x][y]).image);
+			}
 		}
 	}
 }

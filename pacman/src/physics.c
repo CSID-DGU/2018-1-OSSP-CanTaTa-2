@@ -108,12 +108,11 @@ MovementResult move_ghost(PhysicsBody *body)
 		return result;
 	}
 
-	//check if we've gone onto a new square
-	//int low = -8;
-	//int high = 7;
-	int low = -8;
-	int high = 7;
-	int offset = 15;
+
+		int low = -8;
+		int high = 7;
+		int offset = 15;
+
 
 	if (body->xOffset < low)
 	{
@@ -258,9 +257,6 @@ bool move_pacman(PhysicsBody *body, bool canMoveCur, bool canMoveNext)
 		return result;
 	}
 
-	//check if we've gone onto a new square
-	//int low = -8;
-	//int high = 7;
 	int low = -8;
 	int high = 7;
 	int offset = 15;

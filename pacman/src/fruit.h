@@ -2,6 +2,7 @@
 
 #include <stdbool.h>
 #include "board.h"
+#include "main.h"
 
 #define NUM_FRUIT 8
 

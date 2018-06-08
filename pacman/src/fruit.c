@@ -53,11 +53,20 @@ void reset_fruit(GameFruit *gameFruit, Board *board)
 	//srand((unsigned)time(NULL));
 	int randX = 0;
 	int randY = 0;
-	do {
+	if(Multi_flags() == 1) // #9 Dong : 2p 맵 연동을 위한 추가
+	{
+		do {
+			randX = rand() % 54;
+			randY = rand() % 30;
+		} while( (is_valid_square(board, randX, randY) || is_tele_square(randX, randY) ) == false);
+	}
+	else
+	{
+		do {
 			randX = rand() % 26;
 			randY = rand() % 30;
-	} while( (is_valid_square(board, randX, randY) || is_tele_square(randX, randY) ) == false);
-
+		} while( (is_valid_square(board, randX, randY) || is_tele_square(randX, randY) ) == false);
+	}
 	gameFruit->fruit = Cherry;
 	gameFruit->fruitMode = NotDisplaying;
 	gameFruit->startedAt = 0;

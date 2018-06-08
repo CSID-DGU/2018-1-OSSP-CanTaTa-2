@@ -54,6 +54,7 @@ static PacmanGame* recvPac;
 
 static bool gameRunning = true;
 static int numCredits = 0;
+static int Multi_flag = 0;
 
 int main(void)
 {
@@ -112,7 +113,6 @@ static void internal_tick(void)
 		else if(menuSystem.action == GoToMulti)
 		{
 			state = Joinmulti;
-			startgame_init();
 		}
 
 		break;
@@ -193,10 +193,15 @@ static void internal_render(void)
 		if(multi_mode_render(&menuSystem) == 2)
 		{
 			state = Game;
+			startgame_init();
+			game_tick(&pacmanGame);
 		}
 		else if(multi_mode_render(&menuSystem) == 3)
 		{
 			resource_init_Multi();
+			game_init2(pacmanGame.currentLevel);
+			startgame_init();
+			game_tick(&pacmanGame);
 			state = Game;
 		}
 
@@ -207,6 +212,7 @@ static void internal_render(void)
 
 void game_init2(int level) // # 9 Dong : 레벨별 맵 연동
 {
+	Multi_flag = 1;
 	char *Map_list[5] = {"maps/2pMap","maps/2pMap1","maps/2pMap2","maps/2pMap3","maps/2pMap4"};
 	int temp = 0;
 	temp = (level % 5);
@@ -267,6 +273,7 @@ static void resource_init_Multi(void)
 	dispose_window();
 	int SCREEN_WIDTH2 = 896;
 	init_window(SCREEN_TITLE, SCREEN_WIDTH2, SCREEN_HEIGHT);
+
 
 	//TODO: ensure all the resources loaded properly with some nice function calls
 }
@@ -348,7 +355,10 @@ int num_credits(void)
 	return numCredits;
 }
 
-
+int Multi_flags(void)
+{
+	return Multi_flag;
+}
 
 static void cp_pellet(Pellet* a,Pellet* b)
 {
@@ -373,7 +383,7 @@ static void cp_pacman(PacmanGame* pac)
 	}
 	pacmanGame.pelletHolder.numLeft = pac->pelletHolder.numLeft;
 	pacmanGame.pelletHolder.totalNum = pac->pelletHolder.totalNum;
-	for(int i = 0 ; i <243; i++)
+	for(int i = 0 ; i <487; i++)
 	{
 		cp_pellet(&pacmanGame.pelletHolder.pellets[i],&pac->pelletHolder.pellets[i]);
 	}

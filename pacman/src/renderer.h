@@ -10,6 +10,7 @@
 #include "text.h"
 #include "object.h"
 #include "game.h"
+#include "main.h"
 
 //Holds data relating to a single rendered ghost-row.
 typedef struct

@@ -1,7 +1,7 @@
 #pragma once
 
 #include <stdbool.h>
-
+#include "main.h"
 #include "direction.h"
 
 //Defines a physics entity which can move in a 2d grid.
