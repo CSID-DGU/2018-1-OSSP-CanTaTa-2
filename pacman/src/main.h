@@ -16,7 +16,9 @@ typedef enum
 
 } ProgramState;
 
+
 //Returns the number of credits the user currently has.
 int num_credits(void);
 static void resource_init_Multi(void); // # 9 Dong : 2P 맵 연동을 위한 함수
-static void game_init2(void); // # 9 Dong : 2.
+void game_init2(int level); // # 9 Dong : 2.
+void game_init(int level); // # 9 Dong : 레벨별 맵 연동을위한 자리이동

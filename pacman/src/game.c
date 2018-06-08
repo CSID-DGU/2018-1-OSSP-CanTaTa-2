@@ -902,6 +902,7 @@ void gamestart_init(PacmanGame *game)
 void level_init(PacmanGame *game)
 {
 	//reset pacmans position
+	game_init(game->currentLevel);
 	pacman_level_init(&game->pacman[0]);
 
 	//reset pellets

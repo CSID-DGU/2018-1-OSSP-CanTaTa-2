@@ -117,6 +117,17 @@ int multi_mode_render(MenuSystem *menuSystem)// # 9 Dong : 확장맵 테스트�
 {
 	int get= getKey();
 
+	if(menuSystem->action == SmallMap)
+	{
+		menuSystem->playMode = Multi;
+		return 2;
+	}
+	else if(menuSystem->action == LargeMap)
+	{
+		menuSystem->playMode = Multi;
+		return 3;
+	}
+
 	if(get==SDLK_UP&&s_c_num==1)
 	{
 			s_c_num = 0;
@@ -129,15 +140,11 @@ int multi_mode_render(MenuSystem *menuSystem)// # 9 Dong : 확장맵 테스트�
 	{
 		if(s_c_num == 0) // # 9 Dong : 2. 작은 맵
 		{
-			menuSystem->action=GoToMulti;
-			menuSystem->playMode = Multi;
-			return 2;
+			menuSystem->action=SmallMap;
 		}
 		else if(s_c_num == 1) // # 9 Dong : 2. 큰 맵
 		{
-			menuSystem->action=GoToMulti;
-			menuSystem->playMode = Multi;
-			return 3;
+			menuSystem->action=LargeMap;
 		}
 	}
 	draw_multi_mode(&s_c_num);

@@ -21,7 +21,7 @@
 static void resource_init(void);
 
 //Initialize all the internal entities needed for the game at startup.
-static void game_init(void);
+
 
 //Called when a game is about to begin (player hits enter from main menu).
 static void startgame_init(void);
@@ -55,13 +55,11 @@ static PacmanGame* recvPac;
 static bool gameRunning = true;
 static int numCredits = 0;
 
-int multi_check = 0;
-
 int main(void)
 {
 	recvPac = (PacmanGame*)malloc(sizeof(PacmanGame));
 	resource_init();
-	game_init();
+	game_init(1000);
 
 	main_loop();
 
@@ -89,35 +87,6 @@ static void internal_tick(void)
 	int up_down = 0;
 	switch (state)
 	{
-<<<<<<< HEAD
-		case Menu:// #8 Kim : 2. menu_tick 에서 키 입력에 따라 up_down 값을 바꿔줌
-
-			up_down = menu_tick(&menuSystem);
-
-			if(pacmanGame.playMode==Single && up_down ==-1)//Single 이면서 up_down 이 -1 ( 즉 맨 위인데 다시 위로가기면 그대로 유지)
-				pacmanGame.playMode=Single;
-			else if (pacmanGame.playMode==Online&&up_down==1)//Online 이면서 up_down 이 1 (즉 맨 아래인데 다시 아래로가면 그대로 유지)
-				pacmanGame.playMode = Online;
-			else
-				pacmanGame.playMode+=up_down;//그 외는 그안에서 왔다갔다 하도록 함.
-
-			menuSystem.playMode=pacmanGame.playMode; //#13 Kim : 이 부분에서 메뉴시스템한테 playMOde 전달~
-
-			if (menuSystem.action == GoToGame)
-			{
-				state = Game;
-				pacmanGame.playMode=menuSystem.playMode;//#20 Kim : 1. 테스트용 으로 multi로 잠시
-				startgame_init();
-			}
-			else if(menuSystem.action == GoToMulti) // # 9 Dong : 확장맵 테스트를 위함
-			{
-				state = Joinmulti;
-			}
-			else if(menuSystem.action == GoToJoin)
-			{
-				state = Join;
-			}
-=======
 	case Menu:// #8 Kim : 2. menu_tick 에서 키 입력에 따라 up_down 값을 바꿔줌
 
 		up_down = menu_tick(&menuSystem);
@@ -140,18 +109,20 @@ static void internal_tick(void)
 		{
 			state = Join;
 		}
+		else if(menuSystem.action == GoToMulti)
+		{
+			state = Joinmulti;
+			startgame_init();
+		}
 
 		break;
 	case Game:
-
-
 		if(menuSystem.playMode==Online_Server)
 		{
 			client_key key;
 
 			recv(c_socket_fd, (char*)&key, sizeof(key), MSG_WAITALL);
 			get_key(&key);
->>>>>>> f1fc6c8f1c468255eed886fafaaca500a2780462
 
 			game_tick(&pacmanGame);
 			send(c_socket_fd, (char*)&pacmanGame, sizeof(PacmanGame),0);
@@ -162,16 +133,6 @@ static void internal_tick(void)
 			client_key key;
 			insert_key(&key);
 
-<<<<<<< HEAD
-			break;
-		case Intermission:
-			intermission_tick();
-			break;
-		case Join:
-			break;
-		case Joinmulti:
-			break;
-=======
 			send(clientSocket, (char*)&key, sizeof(key),0);
 
 
@@ -197,7 +158,6 @@ static void internal_tick(void)
 	case Join:
 
 		break;
->>>>>>> f1fc6c8f1c468255eed886fafaaca500a2780462
 	}
 }
 
@@ -226,34 +186,36 @@ static void internal_render(void)
 			break;
 		default:
 			break;
-<<<<<<< HEAD
-		case Joinmulti:
-			if(multi_mode_render(&menuSystem)==2)// # 9 Dong : 2. 작은 맵
-			{
-				state = Game;
-			}
-			else if(multi_mode_render(&menuSystem)==3) // # 9 Dong : 1. 큰 맵
-			{
-				resource_init_Multi();
-				state = Game;
-			}
-
-			break;
-=======
 		}
 
 		break;
->>>>>>> f1fc6c8f1c468255eed886fafaaca500a2780462
-	}
+	case Joinmulti:
+		if(multi_mode_render(&menuSystem) == 2)
+		{
+			state = Game;
+		}
+		else if(multi_mode_render(&menuSystem) == 3)
+		{
+			resource_init_Multi();
+			state = Game;
+		}
 
+		break;
+	}
 	flip_screen();
 }
 
-static void game_init(void)
+void game_init2(int level) // # 9 Dong : 레벨별 맵 연동
 {
+	char *Map_list[5] = {"maps/2pMap","maps/2pMap1","maps/2pMap2","maps/2pMap3","maps/2pMap4"};
+	int temp = 0;
+	temp = (level % 5);
 	//Load the board here. We only need to do it once
-	load_board(&pacmanGame.board, &pacmanGame.pelletHolder, "maps/encodedboard");
 
+	load_board(&pacmanGame.board, &pacmanGame.pelletHolder,Map_list[temp]); // #9 Dong : 레벨별 맵연동을 위한 추가
+
+	if(level == 1000) // #9 Dong : 처음 한번만 실행하도록
+	{
 	//set to be in menu
 	state = Menu;
 
@@ -261,13 +223,20 @@ static void game_init(void)
 	fps_init(60);
 
 	menu_init(&menuSystem);
+	}
 }
 
-static void game_init2(void) // # 9 Dong : 2.
+void game_init(int level) // # 9 Dong : 레벨별 맵 연동
 {
+	char *Map_list[5] = {"maps/encodedboard","maps/encodedboard1","maps/encodedboard2","maps/encodedboard3","maps/encodedboard4"};
+	int temp = 0;
+	temp = (level % 5);
 	//Load the board here. We only need to do it once
-	load_board(&pacmanGame.board, &pacmanGame.pelletHolder, "maps/2pMap");
 
+	load_board(&pacmanGame.board, &pacmanGame.pelletHolder,Map_list[temp]); // #9 Dong : 레벨별 맵연동을 위한 추가
+
+	if(level == 1000) // #9 Dong : 처음 한번만 실행하도록
+	{
 	//set to be in menu
 	state = Menu;
 
@@ -275,6 +244,7 @@ static void game_init2(void) // # 9 Dong : 2.
 	fps_init(60);
 
 	menu_init(&menuSystem);
+	}
 }
 
 static void startgame_init(void)
@@ -292,14 +262,13 @@ static void resource_init(void)
 	//TODO: ensure all the resources loaded properly with some nice function calls
 }
 
-static void resource_init_Multi(void) // # 9 Dong : 2P 맵 연동을 위한 함수
+static void resource_init_Multi(void)
 {
 	dispose_window();
 	int SCREEN_WIDTH2 = 896;
-	init_window(SCREEN_TITLE,SCREEN_WIDTH2,SCREEN_HEIGHT);
-	load_images();
-	load_sounds();
-	load_text();
+	init_window(SCREEN_TITLE, SCREEN_WIDTH2, SCREEN_HEIGHT);
+
+	//TODO: ensure all the resources loaded properly with some nice function calls
 }
 
 static void clean_up(void)
@@ -343,12 +312,9 @@ static void process_events(void)
 {// #8 Kim : 1.
 	if (keycode == SDLK_RETURN) pacmanGame.currentLevel++;
 	if (keycode == SDLK_BACKSPACE) menuSystem.ticksSinceModeChange = SDL_GetTicks();
-
 	static bool rateSwitch = false;
-
 	//TODO: remove this hack and try make it work with the physics body
 	if (keycode == SDLK_SPACE) fps_sethz(60);//(rateSwitch = !rateSwitch) ? 200 : 60);// 버그 : 일단 ..뭐지흠.
-
 	if (keycode == SDLK_b) {
 		if(!pacmanGame.pacman[0].boostOn) {
 			pacmanGame.pacman[0].body.velocity = 100;
@@ -358,25 +324,21 @@ static void process_events(void)
 			pacmanGame.pacman[0].boostOn = false;
 		}
 	}
-
 	//TODO: move logic into the tick method of the menu
 	if (state == Menu && keycode == SDLK_5 && numCredits < 99)
 	{
 		numCredits++;
 	}
-
 	if (keycode == SDLK_9)
 	{
 		printf("plus\n");
 		for (int i = 0; i < 4; i++) pacmanGame.ghosts[i].body.velocity += 5;
-
 		printf("ghost speed: %d\n", pacmanGame.ghosts[0].body.velocity);
 	}
 	else if (keycode == SDLK_0)
 	{
 		printf("minus\n");
 		for (int i = 0; i < 4; i++) pacmanGame.ghosts[i].body.velocity -= 5;
-
 		printf("ghost speed: %d\n", pacmanGame.ghosts[0].body.velocity);
 	}
 }
