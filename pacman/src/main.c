@@ -50,6 +50,8 @@ static PacmanGame pacmanGame;
 static bool gameRunning = true;
 static int numCredits = 0;
 
+int multi_check = 0;
+
 int main(void)
 {
 	resource_init();
@@ -99,7 +101,7 @@ static void internal_tick(void)
 				pacmanGame.playMode=menuSystem.playMode;//#20 Kim : 1. 테스트용 으로 multi로 잠시
 				startgame_init();
 			}
-			else if(menuSystem.action == GoToMulti)
+			else if(menuSystem.action == GoToMulti) // # 9 Dong : 확장맵 테스트를 위함
 			{
 				state = Joinmulti;
 			}
@@ -150,10 +152,16 @@ static void internal_render(void)
 				state=Menu;
 			break;
 		case Joinmulti:
-			if(multi_mode_render(&menuSystem)==2)// #20 Kim : 1. 만약 접속 되었으면 state를 Menu로 바꿔줌
+			if(multi_mode_render(&menuSystem)==2)// # 9 Dong : 2. 작은 맵
 			{
 				state = Game;
 			}
+			else if(multi_mode_render(&menuSystem)==3) // # 9 Dong : 1. 큰 맵
+			{
+				resource_init_Multi();
+				state = Game;
+			}
+
 			break;
 	}
 
@@ -164,6 +172,20 @@ static void game_init(void)
 {
 	//Load the board here. We only need to do it once
 	load_board(&pacmanGame.board, &pacmanGame.pelletHolder, "maps/encodedboard");
+
+	//set to be in menu
+	state = Menu;
+
+	//init the framerate manager
+	fps_init(60);
+
+	menu_init(&menuSystem);
+}
+
+static void game_init2(void) // # 9 Dong : 2.
+{
+	//Load the board here. We only need to do it once
+	load_board(&pacmanGame.board, &pacmanGame.pelletHolder, "maps/2pMap");
 
 	//set to be in menu
 	state = Menu;
@@ -187,6 +209,16 @@ static void resource_init(void)
 	load_text();
 
 	//TODO: ensure all the resources loaded properly with some nice function calls
+}
+
+static void resource_init_Multi(void) // # 9 Dong : 2P 맵 연동을 위한 함수
+{
+	dispose_window();
+	int SCREEN_WIDTH2 = 896;
+	init_window(SCREEN_TITLE,SCREEN_WIDTH2,SCREEN_HEIGHT);
+	load_images();
+	load_sounds();
+	load_text();
 }
 
 static void clean_up(void)
