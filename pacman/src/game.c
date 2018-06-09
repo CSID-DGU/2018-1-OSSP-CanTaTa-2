@@ -902,6 +902,14 @@ void gamestart_init(PacmanGame *game)
 void level_init(PacmanGame *game)
 {
 	//reset pacmans position
+	if(Multi_flags() == 1) // # 9 Dong : 2p 맵 연동을 위한 추가
+	{
+		game_init2(game->currentLevel);
+	}
+	else
+	{
+		game_init(game->currentLevel);
+	}
 	pacman_level_init(&game->pacman[0]);
 
 	//reset pellets
@@ -970,12 +978,24 @@ static bool resolve_telesquare(PhysicsBody *body)
 {
 	//TODO: chuck this back in the board class somehow
 
-	if (body->y != 14) return false;
+	if(Multi_flags() == 1) // # 9 Dong : 2P 맵 연동을 위한 수정.
+	{
+		if (body->y != 14) return false;
 
-	if (body->x == -1) { body->x = 27; return true; }
-	if (body->x == 28) { body->x =  0; return true; }
+		if (body->x == -1) { body->x = 55; return true; }
+		if (body->x == 56) { body->x =  0; return true; }
 
-	return false;
+		return false;
+	}
+	else
+	{
+		if (body->y != 14) return false;
+
+		if (body->x == -1) { body->x = 27; return true; }
+		if (body->x == 28) { body->x =  0; return true; }
+
+		return false;
+	}
 }
 
 //#5 Yang : 4.각 Object 효과 구현

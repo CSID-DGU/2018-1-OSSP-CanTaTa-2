@@ -50,6 +50,8 @@ int menu_tick(MenuSystem *menuSystem)
 	{
 		if(menuSystem->playMode==Online)
 			menuSystem->action = GoToJoin;// #19 Kim : 1. 여기서 저게 온라인게임으로 되미녀 엑션 바뀌
+		else if (menuSystem -> playMode == Multi)
+			menuSystem->action = GoToMulti;
 		else
 			menuSystem->action = GoToGame;
 		return 0;
@@ -109,6 +111,44 @@ int getKey(void)// #19 Kim : 1. 여기서 키값 받아서 와따가따리
 	else if(key_released(SDLK_PERIOD))
 		return SDLK_PERIOD;
 	return 0;
+}
+
+int multi_mode_render(MenuSystem *menuSystem)// # 9 Dong : 확장맵 테스트를 위한 추가
+{
+	int get= getKey();
+
+	if(menuSystem->action == SmallMap)
+	{
+		menuSystem->playMode = Multi;
+		return 2;
+	}
+	else if(menuSystem->action == LargeMap)
+	{
+		menuSystem->playMode = Multi;
+		return 3;
+	}
+
+	if(get==SDLK_UP&&s_c_num==1)
+	{
+			s_c_num = 0;
+	}
+	else if(get==SDLK_DOWN&&s_c_num==0)
+	{
+			s_c_num = 1;
+	}
+	else if(get == SDLK_KP_ENTER)
+	{
+		if(s_c_num == 0) // # 9 Dong : 2. 작은 맵
+		{
+			menuSystem->action=SmallMap;
+		}
+		else if(s_c_num == 1) // # 9 Dong : 2. 큰 맵
+		{
+			menuSystem->action=LargeMap;
+		}
+	}
+	draw_multi_mode(&s_c_num);
+	return 1;
 }
 
 int online_mode_render(MenuSystem *menuSystem)// #19 Kim : 2. 여기서 그려줌

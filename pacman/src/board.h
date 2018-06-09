@@ -1,10 +1,11 @@
 #pragma once
 
+#include "main.h"
 #include <stdbool.h>
 #include <SDL/SDL.h>
 #include <SDL/SDL_image.h>
 
-#define BOARD_LENGTH 28
+#define BOARD_LENGTH 56 // #9 Dong : 2p 맵 확장을 위한 수정
 #define BOARD_HEIGHT 31
 
 typedef enum

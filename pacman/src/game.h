@@ -6,6 +6,7 @@
 #include "pacman.h"
 #include "pellet.h"
 #include "object.h"
+#include "main.h"
 
 typedef enum {
 	GameBeginState,

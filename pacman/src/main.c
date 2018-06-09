@@ -21,7 +21,7 @@
 static void resource_init(void);
 
 //Initialize all the internal entities needed for the game at startup.
-static void game_init(void);
+
 
 //Called when a game is about to begin (player hits enter from main menu).
 static void startgame_init(void);
@@ -54,12 +54,13 @@ static PacmanGame* recvPac;
 
 static bool gameRunning = true;
 static int numCredits = 0;
+static int Multi_flag = 0;
 
 int main(void)
 {
 	recvPac = (PacmanGame*)malloc(sizeof(PacmanGame));
 	resource_init();
-	game_init();
+	game_init(1000);
 
 	main_loop();
 
@@ -109,11 +110,13 @@ static void internal_tick(void)
 		{
 			state = Join;
 		}
+		else if(menuSystem.action == GoToMulti)
+		{
+			state = Joinmulti;
+		}
 
 		break;
 	case Game:
-
-
 		if(menuSystem.playMode==Online_Server)
 		{
 			client_key key;
@@ -186,16 +189,39 @@ static void internal_render(void)
 		}
 
 		break;
-	}
+	case Joinmulti:
+		if(multi_mode_render(&menuSystem) == 2)
+		{
+			state = Game;
+			startgame_init();
+			game_tick(&pacmanGame);
+		}
+		else if(multi_mode_render(&menuSystem) == 3)
+		{
+			resource_init_Multi();
+			game_init2(pacmanGame.currentLevel);
+			startgame_init();
+			game_tick(&pacmanGame);
+			state = Game;
+		}
 
+		break;
+	}
 	flip_screen();
 }
 
-static void game_init(void)
+void game_init2(int level) // # 9 Dong : 레벨별 맵 연동
 {
+	Multi_flag = 1;
+	char *Map_list[5] = {"maps/2pMap","maps/2pMap1","maps/2pMap2","maps/2pMap3","maps/2pMap4"};
+	int temp = 0;
+	temp = (level % 5);
 	//Load the board here. We only need to do it once
-	load_board(&pacmanGame.board, &pacmanGame.pelletHolder, "maps/encodedboard");
 
+	load_board(&pacmanGame.board, &pacmanGame.pelletHolder,Map_list[temp]); // #9 Dong : 레벨별 맵연동을 위한 추가
+
+	if(level == 1000) // #9 Dong : 처음 한번만 실행하도록
+	{
 	//set to be in menu
 	state = Menu;
 
@@ -203,6 +229,28 @@ static void game_init(void)
 	fps_init(60);
 
 	menu_init(&menuSystem);
+	}
+}
+
+void game_init(int level) // # 9 Dong : 레벨별 맵 연동
+{
+	char *Map_list[5] = {"maps/encodedboard","maps/encodedboard1","maps/encodedboard2","maps/encodedboard3","maps/encodedboard4"};
+	int temp = 0;
+	temp = (level % 5);
+	//Load the board here. We only need to do it once
+
+	load_board(&pacmanGame.board, &pacmanGame.pelletHolder,Map_list[temp]); // #9 Dong : 레벨별 맵연동을 위한 추가
+
+	if(level == 1000) // #9 Dong : 처음 한번만 실행하도록
+	{
+	//set to be in menu
+	state = Menu;
+
+	//init the framerate manager
+	fps_init(60);
+
+	menu_init(&menuSystem);
+	}
 }
 
 static void startgame_init(void)
@@ -216,6 +264,16 @@ static void resource_init(void)
 	load_images();
 	load_sounds();
 	load_text();
+
+	//TODO: ensure all the resources loaded properly with some nice function calls
+}
+
+static void resource_init_Multi(void)
+{
+	dispose_window();
+	int SCREEN_WIDTH2 = 896;
+	init_window(SCREEN_TITLE, SCREEN_WIDTH2, SCREEN_HEIGHT);
+
 
 	//TODO: ensure all the resources loaded properly with some nice function calls
 }
@@ -261,12 +319,9 @@ static void process_events(void)
 {// #8 Kim : 1.
 	if (keycode == SDLK_RETURN) pacmanGame.currentLevel++;
 	if (keycode == SDLK_BACKSPACE) menuSystem.ticksSinceModeChange = SDL_GetTicks();
-
 	static bool rateSwitch = false;
-
 	//TODO: remove this hack and try make it work with the physics body
 	if (keycode == SDLK_SPACE) fps_sethz(60);//(rateSwitch = !rateSwitch) ? 200 : 60);// 버그 : 일단 ..뭐지흠.
-
 	if (keycode == SDLK_b) {
 		if(!pacmanGame.pacman[0].boostOn) {
 			pacmanGame.pacman[0].body.velocity = 100;
@@ -276,25 +331,21 @@ static void process_events(void)
 			pacmanGame.pacman[0].boostOn = false;
 		}
 	}
-
 	//TODO: move logic into the tick method of the menu
 	if (state == Menu && keycode == SDLK_5 && numCredits < 99)
 	{
 		numCredits++;
 	}
-
 	if (keycode == SDLK_9)
 	{
 		printf("plus\n");
 		for (int i = 0; i < 4; i++) pacmanGame.ghosts[i].body.velocity += 5;
-
 		printf("ghost speed: %d\n", pacmanGame.ghosts[0].body.velocity);
 	}
 	else if (keycode == SDLK_0)
 	{
 		printf("minus\n");
 		for (int i = 0; i < 4; i++) pacmanGame.ghosts[i].body.velocity -= 5;
-
 		printf("ghost speed: %d\n", pacmanGame.ghosts[0].body.velocity);
 	}
 }
@@ -304,7 +355,10 @@ int num_credits(void)
 	return numCredits;
 }
 
-
+int Multi_flags(void)
+{
+	return Multi_flag;
+}
 
 static void cp_pellet(Pellet* a,Pellet* b)
 {
@@ -329,11 +383,20 @@ static void cp_pacman(PacmanGame* pac)
 	}
 	pacmanGame.pelletHolder.numLeft = pac->pelletHolder.numLeft;
 	pacmanGame.pelletHolder.totalNum = pac->pelletHolder.totalNum;
-	for(int i = 0 ; i <243; i++)
+	if(Multi_flags() == 1) // # 35 DOng : 버그 수정 펠렛먹으면 레벨 진행을 위함.
 	{
-		cp_pellet(&pacmanGame.pelletHolder.pellets[i],&pac->pelletHolder.pellets[i]);
+		for(int i = 0 ; i <487; i++)
+		{
+			cp_pellet(&pacmanGame.pelletHolder.pellets[i],&pac->pelletHolder.pellets[i]);
+		}
 	}
-
+	else
+	{
+		for(int i = 0 ; i <243; i++)
+		{
+			cp_pellet(&pacmanGame.pelletHolder.pellets[i],&pac->pelletHolder.pellets[i]);
+		}
+	}
 	pacmanGame.gameFruit1=pac->gameFruit1;
 	pacmanGame.gameFruit2=pac->gameFruit2;
 	pacmanGame.gameFruit3=pac->gameFruit3;

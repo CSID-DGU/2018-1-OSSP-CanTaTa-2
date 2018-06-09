@@ -3,6 +3,7 @@
 #include "board.h"
 #include "direction.h"
 #include "pacman.h"
+#include "main.h"
 
 typedef enum
 {

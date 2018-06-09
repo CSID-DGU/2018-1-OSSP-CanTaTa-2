@@ -116,11 +116,21 @@ void load_board(Board *board, PelletHolder *pelletHolder, const char* file)
 		image = NULL;
 		walkable = false;
 		x++;
-
-		if (x == BOARD_LENGTH)
+		if(Multi_flags() == 1)
 		{
-			x = 0;
-			y++;
+			if (x == 56)
+			{
+				x = 0;
+				y++;
+			}
+		}
+		else
+		{
+			if (x == 28)
+			{
+				x = 0;
+				y++;
+			}
 		}
 	}
 

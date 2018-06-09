@@ -2,6 +2,8 @@
 
 void pellets_init(PelletHolder *pelletHolder)
 {
+	if(Multi_flags() == 1) // # 35 Dong : 버그 수정, 펠렛을 다먹어도 진행이 안되던 사항.
+	{
 	for (int i = 0; i < NUM_PELLETS; i++)
 	{
 		pelletHolder->pellets[i].eaten = false;
@@ -9,6 +11,17 @@ void pellets_init(PelletHolder *pelletHolder)
 
 	pelletHolder->numLeft = NUM_PELLETS;
 	pelletHolder->totalNum = NUM_PELLETS;
+	}
+	else
+	{
+		for (int i = 0; i < 244; i++)
+		{
+			pelletHolder->pellets[i].eaten = false;
+		}
+
+		pelletHolder->numLeft = 244;
+		pelletHolder->totalNum = 244;
+	}
 }
 
 int pellet_points(Pellet *pellet)

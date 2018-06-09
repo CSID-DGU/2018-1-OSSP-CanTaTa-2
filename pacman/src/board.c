@@ -5,17 +5,34 @@
 
 bool is_valid_square(Board *board, int x, int y)
 {
-	if (x < 0 || y < 0) return false;
-	if (x >= BOARD_LENGTH || y >= BOARD_HEIGHT) return false;
-
-	return board->boardSquares[x][y].walkable;
+	if(Multi_flags() == 1) // # 9 Dong : 2p 맵 연동을 위한 추가
+	{
+		if (x < 0 || y < 0) return false;
+		if (x >= 56 || y >= 31) return false;
+		return board->boardSquares[x][y].walkable;
+	}
+	else
+	{
+		if (x < 0 || y < 0) return false;
+		if (x >= 28 || y >= 31) return false;
+		return board->boardSquares[x][y].walkable;
+	}
 }
 
 bool is_tele_square(int x, int y)
 {
-	if (x == -1 && y == 14) return true;
-	else if (x == 28 && y == 14) return true;
-	else return false;
+	if(Multi_flags() == 1) // # 9 Dong : 2p 맵 연동을 위한 추가
+	{
+		if (x == -1 && y == 14) return true;
+		else if (x == 56 && y == 14) return true;
+		else return false;
+	}
+	else
+	{
+		if (x == -1 && y == 14) return true;
+		else if (x == 28 && y == 14) return true;
+		else return false;
+	}
 }
 
 bool is_ghost_noup_square(int x, int y)

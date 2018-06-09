@@ -60,17 +60,32 @@ void send_to_home(Ghost *ghost, GhostType type)
 	int targetX;
 	int targetY;
 
-	switch (type)
+	if(Multi_flags() == 1)// # 9 Dong :2p 맵 연동을 위한 추가
 	{
-		case Blinky: { targetX = 25; targetY =  -2; break; }
-		case Inky:   { targetX = 27; targetY =  31; break; }
-		case Clyde:  { targetX =  0; targetY =  31; break; }
-		case Pinky:  { targetX =  2; targetY =  -2; break; }
-		default:
-			printf("error ghost\naborting\n");
-			exit(1);
+		switch (type)
+		{
+			case Blinky: { targetX = 53; targetY =  -2; break; }
+			case Inky:   { targetX = 55; targetY =  31; break; }
+			case Clyde:  { targetX =  0; targetY =  31; break; }
+			case Pinky:  { targetX =  2; targetY =  -2; break; }
+			default:
+				printf("error ghost\naborting\n");
+				exit(1);
+		}
 	}
-
+	else
+	{
+		switch (type)
+		{
+			case Blinky: { targetX = 25; targetY =  -2; break; }
+			case Inky:   { targetX = 27; targetY =  31; break; }
+			case Clyde:  { targetX =  0; targetY =  31; break; }
+			case Pinky:  { targetX =  2; targetY =  -2; break; }
+			default:
+				printf("error ghost\naborting\n");
+				exit(1);
+		}
+	}
 	ghost->targetX = targetX;
 	ghost->targetY = targetY;
 }
@@ -125,9 +140,16 @@ Direction next_direction(Ghost *ghost, Board *board)
 		int testY = ghost->body.y + y + offsets[i].y;
 
 		//allow for when ghost is going through teleporter
-		if (testX == 0) testX = 26;
-		if (testX == 27) testX = 1;
-
+		if(Multi_flags == 1) // # 9 Dong :2p 맵 연동을 위한 추가
+		{
+			if (testX == 0) testX = 54;
+			if (testX == 55) testX = 1;
+		}
+		else
+		{
+			if (testX == 0) testX = 26;
+			if (testX == 27) testX = 1;
+		}
 		//make sure the square is a valid walkable square
 		if (!(is_valid_square(board, testX, testY) || is_tele_square(testX, testY))) continue;
 
@@ -180,11 +202,21 @@ void execute_ghost_logic(Ghost *targetGhost, GhostType type, Ghost *redGhost, Pa
 void execute_red_logic(Ghost *redGhost, Pacman *pacman)
 {
 	// Red's Ai is random x, y
-	int rNum = rand() % 26;
-	int rNum2 = rand() % 30;
+	if(Multi_flags() == 1)
+	{
+		int rNum = rand() % 54;
+		int rNum2 = rand() % 30;
+		redGhost->targetX = rNum;
+		redGhost->targetY = rNum2;
+	}
+	else
+	{
+		int rNum = rand() % 26;
+		int rNum2 = rand() % 30;
+		redGhost->targetX = rNum;
+		redGhost->targetY = rNum2;
+	}
 
-	redGhost->targetX = rNum;
-	redGhost->targetY = rNum2;
 
 	// Red's AI is to set his target position to pacmans
 	//redGhost->targetX = pacman->body.x;

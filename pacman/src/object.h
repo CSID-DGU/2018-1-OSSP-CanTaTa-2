@@ -2,7 +2,7 @@
 
 #include <stdbool.h>
 #include "board.h"
-
+#include "main.h"
 
 #define NUM_OBJECT 3
 
