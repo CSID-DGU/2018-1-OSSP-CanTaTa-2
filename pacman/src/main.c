@@ -383,11 +383,20 @@ static void cp_pacman(PacmanGame* pac)
 	}
 	pacmanGame.pelletHolder.numLeft = pac->pelletHolder.numLeft;
 	pacmanGame.pelletHolder.totalNum = pac->pelletHolder.totalNum;
-	for(int i = 0 ; i <487; i++)
+	if(Multi_flags() == 1) // # 35 DOng : 버그 수정 펠렛먹으면 레벨 진행을 위함.
 	{
-		cp_pellet(&pacmanGame.pelletHolder.pellets[i],&pac->pelletHolder.pellets[i]);
+		for(int i = 0 ; i <487; i++)
+		{
+			cp_pellet(&pacmanGame.pelletHolder.pellets[i],&pac->pelletHolder.pellets[i]);
+		}
 	}
-
+	else
+	{
+		for(int i = 0 ; i <243; i++)
+		{
+			cp_pellet(&pacmanGame.pelletHolder.pellets[i],&pac->pelletHolder.pellets[i]);
+		}
+	}
 	pacmanGame.gameFruit1=pac->gameFruit1;
 	pacmanGame.gameFruit2=pac->gameFruit2;
 	pacmanGame.gameFruit3=pac->gameFruit3;

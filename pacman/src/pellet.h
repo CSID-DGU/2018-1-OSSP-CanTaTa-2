@@ -1,7 +1,7 @@
 #pragma once
 
 #include <stdbool.h>
-
+#include "main.h"
 #include <SDL/SDL.h>
 
 #define NUM_PELLETS 488
