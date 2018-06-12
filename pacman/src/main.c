@@ -311,7 +311,6 @@ static void process_events(void)
 			break;
 		}
 	}
-
 	keyevents_finished();
 }
 
@@ -384,19 +383,20 @@ static void cp_pacman(PacmanGame* pac)
 	pacmanGame.pelletHolder.numLeft = pac->pelletHolder.numLeft;
 	pacmanGame.pelletHolder.totalNum = pac->pelletHolder.totalNum;
 	if(Multi_flags() == 1) // # 35 DOng : 버그 수정 펠렛먹으면 레벨 진행을 위함.
-	{
-		for(int i = 0 ; i <487; i++)
+	{//#35 Kim :  구석탱이 있는 펠렛 안먹어지는거 수정
+		for(int i = 0 ; i <488; i++)
 		{
 			cp_pellet(&pacmanGame.pelletHolder.pellets[i],&pac->pelletHolder.pellets[i]);
 		}
 	}
 	else
 	{
-		for(int i = 0 ; i <243; i++)
+		for(int i = 0 ; i <244; i++)
 		{
 			cp_pellet(&pacmanGame.pelletHolder.pellets[i],&pac->pelletHolder.pellets[i]);
 		}
 	}
+
 	pacmanGame.gameFruit1=pac->gameFruit1;
 	pacmanGame.gameFruit2=pac->gameFruit2;
 	pacmanGame.gameFruit3=pac->gameFruit3;
@@ -407,6 +407,5 @@ static void cp_pacman(PacmanGame* pac)
 	pacmanGame.gameObject3=pac->gameObject3;
 	pacmanGame.gameObject4=pac->gameObject4;
 	pacmanGame.gameObject5=pac->gameObject5;
-
 
 }

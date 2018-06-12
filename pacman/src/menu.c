@@ -16,7 +16,7 @@
 
 //time between each ghost-row appearance
 #define GHOST_BETWEEN 500
-static char tmp[100]={"000.000"};
+static char tmp[100]={"0.0.0.0"};
 static int index_num=0;
 static int s_c_num = 0;
 
@@ -110,6 +110,8 @@ int getKey(void)// #19 Kim : 1. 여기서 키값 받아서 와따가따리
 		return SDLK_KP_ENTER;// #19 Kim : 2. 엔터가 아니라 SDLK_RETURN 인듯. 엔터치면 ㅇㅅㅇ
 	else if(key_released(SDLK_PERIOD))
 		return SDLK_PERIOD;
+	else if(key_released(SDLK_BACKSPACE))//#25 ip 칠때 지워지도록.
+		return SDLK_BACKSPACE;
 	return 0;
 }
 
@@ -130,11 +132,11 @@ int multi_mode_render(MenuSystem *menuSystem)// # 9 Dong : 확장맵 테스트�
 
 	if(get==SDLK_UP&&s_c_num==1)
 	{
-			s_c_num = 0;
+		s_c_num = 0;
 	}
 	else if(get==SDLK_DOWN&&s_c_num==0)
 	{
-			s_c_num = 1;
+		s_c_num = 1;
 	}
 	else if(get == SDLK_KP_ENTER)
 	{
@@ -168,31 +170,32 @@ int online_mode_render(MenuSystem *menuSystem)// #19 Kim : 2. 여기서 그려�
 		menuSystem->playMode = Online_Client;//#25 클라이언트쪽 접속하는 코드 추
 		return JoinServer;
 	}
-	if(get==SDLK_UP&&s_c_num==1)
-	{
-		s_c_num--;
-	}
-	else if(get==SDLK_DOWN&&s_c_num==0)
-	{
-		s_c_num++;
-	}
-	else if(s_c_num==1 && ( (get>=48&&get<=57) ||get==SDLK_PERIOD)) //#25 닷 찍으면 문자열 들어가도록.
-		tmp[index_num++] = (char)get;
-	else if(get==SDLK_KP_ENTER)
-	{
-		if(s_c_num==0)//ROOM 만들 때
+	// 정리 Kim : 코드정리함
+	if(s_c_num==0)
+	{//make room 부분일 때
+		if(get==SDLK_DOWN)s_c_num++;
+		else if(get==SDLK_KP_ENTER)
 		{
-			draw_input_string("WAITING CLIENT");// #19 Kim : 2. waiting client 그려줌 이름을 맞게 바꿔줌
+			draw_input_string("WAITING CLIENT",4,15);// #19 Kim : 2. waiting client 그려줌 이름을 맞게 바꿔줌
 			menuSystem->action=WaitClient;
 			return 0;
 		}
-		else if(s_c_num==1)
+	}
+	else if(s_c_num==1)
+	{//Join room 부분일 때임
+		if(get==SDLK_UP)	s_c_num--;
+		else if((get>=48&&get<=57) ||get==SDLK_PERIOD) //#25 닷 찍으면 문자열 들어가도록.
+			tmp[index_num++] = (char)get;
+		else if(get == SDLK_BACKSPACE)//# 35 백스페이스 적용 되게 했음
+		{if(index_num!=0)tmp[--index_num]='\0';}
+		else if(get==SDLK_KP_ENTER)
 		{
-			draw_input_string("CONNECT SERVER");
+			draw_input_string("CONNECT SERVER",4,15);
 			menuSystem->action = JoinServer;
 			return 0;
 		}
 	}
+
 	draw_online_mode(&s_c_num,tmp);
 	return 1;
 }
