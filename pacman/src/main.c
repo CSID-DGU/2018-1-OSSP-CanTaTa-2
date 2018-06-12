@@ -184,6 +184,10 @@ static void internal_render(void)
 			pacmanGame.playMode= menuSystem.playMode;
 			state=Menu;
 			break;
+		case ReturnMenu://그냥 return menu에선 둘다 초기값으로 초기화
+			pacmanGame.playMode = menuSystem.playMode=Single;
+			state=Menu;
+			break;
 		default:
 			break;
 		}

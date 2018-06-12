@@ -48,7 +48,9 @@ int menu_tick(MenuSystem *menuSystem)
 
 	if (startNew)
 	{
-		if(menuSystem->playMode==Online)
+		if (5000>(SDL_GetTicks() - menuSystem->ticksSinceModeChange))//#35 Kim : 이부분 설명 하자면
+			menuSystem->ticksSinceModeChange=SDL_GetTicks()-5000;//  현재의틱 하고 애가 들어갈떄의 틱하고 비교해서
+		else if(menuSystem->playMode==Online)						//시간이 얼마나 지났는가 확인하는건데 이게 5000미만일 떄 엔터를 눌르면 올려주는거임
 			menuSystem->action = GoToJoin;// #19 Kim : 1. 여기서 저게 온라인게임으로 되미녀 엑션 바뀌
 		else if (menuSystem -> playMode == Multi)
 			menuSystem->action = GoToMulti;
@@ -91,6 +93,8 @@ static void draw_vanity_screen(MenuSystem *menuSystem)
 	if(dt>3000)draw_playMode(menuSystem->playMode);
 	if (dt > 4000) draw_vanity_corporate_info();
 	if (dt > 5000) draw_vanity_animation(dt - 5000);
+
+
 }
 
 int getKey(void)// #19 Kim : 1. 여기서 키값 받아서 와따가따리
@@ -180,6 +184,12 @@ int online_mode_render(MenuSystem *menuSystem)// #19 Kim : 2. 여기서 그려�
 			menuSystem->action=WaitClient;
 			return 0;
 		}
+		else if(get==SDLK_BACKSPACE)//#35 makeRoom 에서 백스페이스 누를시에는 메인메뉴로감
+		{
+			menuSystem->action = Nothing;
+			return ReturnMenu;
+		}
+
 	}
 	else if(s_c_num==1)
 	{//Join room 부분일 때임
@@ -195,7 +205,6 @@ int online_mode_render(MenuSystem *menuSystem)// #19 Kim : 2. 여기서 그려�
 			return 0;
 		}
 	}
-
 	draw_online_mode(&s_c_num,tmp);
 	return 1;
 }

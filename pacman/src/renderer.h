@@ -117,4 +117,4 @@ void draw_playMode(PlayMode playMode);//#13 kim : 메뉴에다가 그플레이�
 
 void draw_online_mode(int *s_c_num ,char* tmp);//#19 Kim : 2. menu.c에있는거 옮겼음
 void draw_input_string(const char tmp[],int x,int y);//#19 Kim : 2. 클라이언트 기다리는거 화면 추가.
-
+void draw_multi_mode(int *s_c_num);
