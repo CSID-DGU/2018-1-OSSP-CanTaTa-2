@@ -45,7 +45,7 @@ void draw_instrc_corporate_info(void);
 //
 
 void draw_common_oneup(bool flashing, int score);
-void draw_common_twoup(bool flashing, int score);
+void draw_common_twoup(bool flashing, int score, int flag);
 void draw_common_highscore(int highscore);
 void draw_credits(int numCredits);
 
@@ -57,9 +57,10 @@ void draw_game_playerone_start(void);
 void draw_game_playertwo_start(void);
 void draw_game_ready(void);
 void draw_game_gameover(void);
+void draw_game_time(int time);
 //#30 Yang :winner 표시 뷰
-void draw_game_playerone_win(void);
-void draw_game_playertwo_win(void);
+void draw_game_playerone_win(int flag);
+void draw_game_playertwo_win(int flag);
 //
 // Fruit renderering
 //
@@ -88,7 +89,7 @@ void draw_large_pellets(PelletHolder *ph, bool flashing);
 void draw_pacman(Pacman *pacman);
 void draw_pacman_static(Pacman *pacman);
 void draw_pacman_death(Pacman *pacman, unsigned int timeSinceDeath);
-void draw_pacman_lives(int numLives1, int numLives2);
+void draw_pacman_lives(int numLives1, int numLives2, int flag);
 
 //
 // Ghost rendering

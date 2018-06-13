@@ -202,6 +202,7 @@ static void internal_render(void)
 		}
 		else if(multi_mode_render(&menuSystem) == 3)
 		{
+			pacmanGame.playMode = menuSystem.playMode;
 			resource_init_Multi();
 			game_init2(pacmanGame.currentLevel);
 			startgame_init();
@@ -382,7 +383,7 @@ static void cp_pacman(PacmanGame* pac)
 	pacmanGame.pacman[0] = pac->pacman[0];
 	pacmanGame.pacman[1] = pac->pacman[1];
 	for(int i=0; i<4; i++) {
-		pacmanGame.ghosts[i] = pac->ghosts[i];
+		pacmanGame.ghosts[0][i] = pac->ghosts[0][i];
 	}
 	pacmanGame.pelletHolder.numLeft = pac->pelletHolder.numLeft;
 	pacmanGame.pelletHolder.totalNum = pac->pelletHolder.totalNum;
@@ -401,15 +402,9 @@ static void cp_pacman(PacmanGame* pac)
 		}
 	}
 
-	pacmanGame.gameFruit1=pac->gameFruit1;
-	pacmanGame.gameFruit2=pac->gameFruit2;
-	pacmanGame.gameFruit3=pac->gameFruit3;
-	pacmanGame.gameFruit4=pac->gameFruit4;
-	pacmanGame.gameFruit5=pac->gameFruit5;
-	pacmanGame.gameObject1=pac->gameObject1;
-	pacmanGame.gameObject2=pac->gameObject2;
-	pacmanGame.gameObject3=pac->gameObject3;
-	pacmanGame.gameObject4=pac->gameObject4;
-	pacmanGame.gameObject5=pac->gameObject5;
+	for(int i=0;i<5;i++){
+		pacmanGame.gameFruit[0][i]=pac->gameFruit[0][i];
+		pacmanGame.gameObject[0][i]=pac->gameObject[0][i];
+	}
 
 }

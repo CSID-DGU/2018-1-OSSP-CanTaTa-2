@@ -169,17 +169,30 @@ void draw_common_oneup(bool flashing, int score)
 	draw_text_coord(get_screen(), scoreStr, 6 - int_length(score), 1);
 }
 
-void draw_common_twoup(bool flashing, int score)
+void draw_common_twoup(bool flashing, int score, int flag)
 {
-	set_text_color(WhiteText);
-	draw_numtext_coord(get_screen(), "2", 22, 0);
-	draw_text_coord(get_screen(), "UP", 23, 0);
+	if(flag){
+		set_text_color(WhiteText);
+		draw_numtext_coord(get_screen(), "2", 22, 0);
+		draw_text_coord(get_screen(), "UP", 23, 0);
 
-	if (flashing && animation_get_frame(265, 2)) return;
+		if (flashing && animation_get_frame(265, 2)) return;
 
-	char scoreStr[256];
-	sprintf(scoreStr, "%01i", score);
-	draw_text_coord(get_screen(), scoreStr, 25 - int_length(score), 1);// #37 Ya록ng : 2P UI 추가 :점수보이도
+		char scoreStr[256];
+		sprintf(scoreStr, "%01i", score);
+		draw_text_coord(get_screen(), scoreStr, 25 - int_length(score), 1);// #37 Ya록ng : 2P UI 추가 :점수보이도
+	}
+	else{
+		set_text_color(WhiteText);
+		draw_numtext_coord(get_screen(), "2", 53, 0);
+		draw_text_coord(get_screen(), "UP", 54, 0);
+
+		if (flashing && animation_get_frame(265, 2)) return;
+
+		char scoreStr[256];
+		sprintf(scoreStr, "%01i", score);
+		draw_text_coord(get_screen(), scoreStr, 55 - int_length(score), 1);// #37 Ya록ng : 2P UI 추가 :점수보이도
+	}
 }
 
 void draw_common_highscore(int highscore)
@@ -193,6 +206,14 @@ void draw_common_highscore(int highscore)
 	char scoreStr[256];
 	sprintf(scoreStr, "%01i", highscore);
 	draw_text_coord(get_screen(), scoreStr, 16 - int_length(highscore), 1);
+}
+void draw_game_time(int time)
+{
+	set_text_color(WhiteText);
+	draw_text_coord(get_screen(), "TIME", 27, 0);
+	char timeStr[256];
+	sprintf(timeStr, "%01i", time);
+	draw_text_coord(get_screen(), timeStr, 30 - int_length(time), 1);
 }
 
 void draw_credits(int numCredits)
@@ -240,15 +261,27 @@ void draw_game_gameover(void)
 	draw_text_coord(get_screen(), "GAME  OVER", 9, 20);
 }
 //#30 Yang :winner 표시 뷰
-void draw_game_playerone_win(void)
+void draw_game_playerone_win(int flag)
 {
-	set_text_color(RedText);
-	draw_text_coord(get_screen(), "PLAYER 1 WIN!", 7, 20);
+	if(!flag){
+		set_text_color(RedText);
+		draw_text_coord(get_screen(), "PLAYER 1 WIN!", 7, 20);
+	}
+	else{
+		set_text_color(RedText);
+		draw_text_coord(get_screen(), "PLAYER 1 WIN!", 22, 20);
+	}
 }
-void draw_game_playertwo_win(void)
+void draw_game_playertwo_win(int flag)
 {
-	set_text_color(RedText);
-	draw_text_coord(get_screen(), "PLAYER 2 WIN!", 7, 20);
+	if(!flag){
+		set_text_color(RedText);
+		draw_text_coord(get_screen(), "PLAYER 2 WIN!", 7, 20);
+	}
+	else{
+		set_text_color(RedText);
+		draw_text_coord(get_screen(), "PLAYER 2 WIN!", 22, 20);
+	}
 }
 //
 //
@@ -489,10 +522,12 @@ void draw_pacman_death(Pacman *pacman, unsigned int dt)
 	draw_image_coord_offset(image, pacman->body.x, pacman->body.y, xOffset, yOffset);
 }
 
-void draw_pacman_lives(int numLives1, int numLives2)
+void draw_pacman_lives(int numLives1, int numLives2,int flag)
 {
 	int x1 = 2 * 16;
-	int x2 = 20*16;
+	int x2;
+	if(flag) x2 = 20*16;
+	else x2 = 40*16;
 	int y = 34 * 16;
 
 	for (int i = 0; i < numLives1; i++)
@@ -653,19 +688,19 @@ void draw_board_flash(Board *board)
 void draw_multi_mode(int *s_c_num) // # 9 Dong : 확장맵 테스트를 위한 메뉴 렌더
 {
 	set_text_color(WhiteText);
-	draw_text_coord(get_screen(), "SMALL MAP", 10, 8);
-	draw_text_coord(get_screen(), "LARGE MAP", 10, 13);
+	draw_text_coord(get_screen(), "SCORE MODE", 10, 8);
+	draw_text_coord(get_screen(), "TIME ATTACK", 10, 13);
 	switch(*s_c_num)
 	{
 	case 0:
 		set_text_color(RedText);
 		draw_text_coord(get_screen(), "#", 8, 8);
-		draw_text_coord(get_screen(), "SMALL MAP", 10, 8);
+		draw_text_coord(get_screen(), "SCORE MODE", 10, 8);
 		break;
 	case 1:
 		set_text_color(RedText);
 		draw_text_coord(get_screen(), "#", 8, 13);
-		draw_text_coord(get_screen(), "LARGE MAP", 10, 13);
+		draw_text_coord(get_screen(), "TIME ATTACK", 10, 13);
 		break;
 	}
 }
@@ -698,6 +733,6 @@ void draw_input_string(const char tmp[],int x,int y)
 	set_text_color(WhiteText);
 	draw_text_coord(get_screen(), tmp, x, y);
 
-
 }
+
 

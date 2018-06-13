@@ -35,13 +35,13 @@ typedef struct
 
 
 //Initializes pacman's location, lives, score. Call at start of the game.
-void pacman_init(Pacman *pacman);
+void pacman_init(Pacman *pacman, int flag);
 
 //Initializes pacman's location. Call at the start of each level.
 void pacman_level_init(Pacman *pacman);
 
 //Initializes pacman's location to the starting point (as well as direction and other values).
-void pacman_location_init(Pacman *pacman);
+void pacman_location_init(Pacman *pacman, int flag);
 
 //Returns pacman speed for given level when not in fright mode.
 int pacman_speed_normal(int level);
