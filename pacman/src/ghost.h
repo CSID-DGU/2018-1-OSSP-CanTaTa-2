@@ -35,9 +35,9 @@ typedef struct
 	int isDead; // 0 = false, 1 = true, 2 = rebirth
 } Ghost;
 
-void ghosts_init(Ghost ghosts[4], int level); //#28 : Yang 2. 난이도 조절 - 유령 속도 조절
+void ghosts_init(Ghost ghosts[4], int level, int flag); //#28 : Yang 2. 난이도 조절 - 유령 속도 조절
 
-void reset_ghost(Ghost *ghost, GhostType type, int level);
+void reset_ghost(Ghost *ghost, GhostType type, int level, int flag);//#32 :Yang : 타임어택 모드를 위한 수정
 
 void execute_ghost_logic(Ghost *targetGhost, GhostType type, Ghost *redGhost, Pacman *pacman);
 

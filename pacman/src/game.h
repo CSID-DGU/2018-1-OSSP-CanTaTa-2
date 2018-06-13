@@ -37,20 +37,25 @@ typedef enum{
 	Multi,
 	Online,
 	Online_Server,
-	Online_Client
+	Online_Client,
+	Multi_TA,
 }PlayMode;
 typedef struct {
 	GameState gameState;
 	unsigned int ticksSinceModeChange;
 	Pacman pacman[2]; // #8 Kim : 1.플레이어수 늘려주기 위해서 배열로 바꿈  Pacman pacman -> pacman[2];
-	Ghost ghosts[4];
+	Ghost ghosts[2][4];
 	Board board;
 	PelletHolder pelletHolder;
-	GameFruit gameFruit1, gameFruit2, gameFruit3, gameFruit4, gameFruit5;
-	GameObject gameObject1, gameObject2, gameObject3, gameObject4, gameObject5;
+	GameFruit gameFruit[2][5];
+	//GameFruit gameFruit1, gameFruit2, gameFruit3, gameFruit4, gameFruit5;
+	GameObject gameObject[2][5];
+	//GameObject gameObject1, gameObject2, gameObject3, gameObject4, gameObject5;
 	int highscore;
 	int currentLevel;
 	PlayMode playMode;
+	int time;
+	int get_ticks;
 } PacmanGame;
 
 //Updates the game 1 tick, or 1/60th of a second.

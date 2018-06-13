@@ -5,7 +5,7 @@
 #include <stdio.h>
 #include <time.h>
 
-void ghosts_init(Ghost ghosts[4], int level)
+void ghosts_init(Ghost ghosts[4], int level, int flag)
 {
 	ghosts[0].ghostType = Blinky;
 	ghosts[1].ghostType = Inky;
@@ -14,13 +14,13 @@ void ghosts_init(Ghost ghosts[4], int level)
 
 	for (int i = 0; i < 4; i++)
 	{
-		reset_ghost(&ghosts[i], ghosts[i].ghostType, level);
+		reset_ghost(&ghosts[i], ghosts[i].ghostType, level,flag);
 	}
 
 	srand(time(NULL));
 }
 
-void reset_ghost(Ghost *ghost, GhostType type, int level)
+void reset_ghost(Ghost *ghost, GhostType type, int level, int flag)
 {
 	int x, y;
 	int ox, oy;
@@ -28,19 +28,27 @@ void reset_ghost(Ghost *ghost, GhostType type, int level)
 	Direction next;
 	MovementMode mode;
 	//
-	switch (type)
-	{
-		case Blinky: { x = 14; y = 11; ox = -8; oy =  0; mode = Chase; dir = Left; next = Left; break; }
-		case Inky: { x = 12; y = 14; ox = -8; oy =  0; mode = Chase; dir = Up;   next = Down; break; }
-		case Clyde: { x = 16; y = 14; ox = -8; oy =  0; mode = Chase; dir = Up;   next = Down; break; }
-		case Pinky: { x = 14; y = 14; ox = -8; oy =  0; mode = Chase; dir = Down; next = Down; break; }
+	if(flag==0){
+		switch (type)
+		{
+			case Blinky: { x = 14; y = 11; ox = -8; oy =  0; mode = Chase; dir = Left; next = Left; break; }
+			case Inky: { x = 12; y = 14; ox = -8; oy =  0; mode = Chase; dir = Up;   next = Down; break; }
+			case Clyde: { x = 16; y = 14; ox = -8; oy =  0; mode = Chase; dir = Up;   next = Down; break; }
+			case Pinky: { x = 14; y = 14; ox = -8; oy =  0; mode = Chase; dir = Down; next = Down; break; }
 
-		//testing
-		//case Inky:  { x = 14; y = 11; ox = -8; oy =  0; mode = Scatter; dir = Left; next = Left; break; }
-		//case Clyde: { x = 14; y = 11; ox = -8; oy =  0; mode = Scatter; dir = Left; next = Left; break; }
-		//case Pinky: { x = 14; y = 11; ox = -8; oy =  0; mode = Scatter; dir = Left; next = Left; break; }
+			default: printf("error ghost\naborting\n"); exit(1);
+		}
+	}
+	else{
+		switch (type)
+		{
+			case Blinky: { x =44; y = 11; ox = -8; oy =  0; mode = Chase; dir = Left; next = Left; break; }
+			case Inky: { x = 42; y = 14; ox = -8; oy =  0; mode = Chase; dir = Up;   next = Down; break; }
+			case Clyde: { x = 45; y = 14; ox = -8; oy =  0; mode = Chase; dir = Up;   next = Down; break; }
+			case Pinky: { x = 44; y = 14; ox = -8; oy =  0; mode = Chase; dir = Down; next = Down; break; }
 
-		default: printf("error ghost\naborting\n"); exit(1);
+			default: printf("error ghost\naborting\n"); exit(1);
+		}
 	}
 
 	ghost->body = (PhysicsBody) { x, y, ox, oy, dir, next, 100, 0, 0};
@@ -151,7 +159,7 @@ Direction next_direction(Ghost *ghost, Board *board)
 			if (testX == 27) testX = 1;
 		}
 		//make sure the square is a valid walkable square
-		if (!(is_valid_square(board, testX, testY) || is_tele_square(testX, testY))) continue;
+		if ((!is_valid_square(board, testX, testY) || is_tele_square(testX, testY))) continue;
 
 		//a further condition is that ghosts cannot enter certain squares moving upwards
 		if (targets[i].dir == Up && is_ghost_noup_square(testX, testY)) continue;

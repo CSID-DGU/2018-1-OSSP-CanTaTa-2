@@ -19,7 +19,7 @@
 
 static void process_player(PacmanGame *game,int player_num);// #8 Kim 2. player num 추가
 static void process_fruit(PacmanGame *game, int player_num);//#5 Yang : 5. playernum 추가
-static void process_ghosts(PacmanGame *game);
+static void process_ghosts(PacmanGame *game, int flag);
 static void process_pellets(PacmanGame *game,int player_num);// #8 Kim 3. player num 추가
 static void process_object(PacmanGame *game, int player_num); //Yang #5: 2. object
 
@@ -30,7 +30,7 @@ static void enter_state(PacmanGame *game, GameState state); //transitions to/ fr
 // #13 Kim : 1. 이 부분 collision 일어난 뒤에 state 부분에 DeathState 붙어서 가게됨.
 //는 다시 수정.
 
-static bool resolve_telesquare(PhysicsBody *body);          //wraps the body around if they've gone tele square
+static bool resolve_telesquare(PhysicsBody *body, int flag);          //wraps the body around if they've gone tele square
 
 void game_tick(PacmanGame *game)
 {
@@ -54,7 +54,9 @@ void game_tick(PacmanGame *game)
 				process_player(game,1);
 
 
-			process_ghosts(game);
+			process_ghosts(game,0);
+			if(game->playMode==Multi_TA)
+				process_ghosts(game,1);
 
 			process_fruit(game,0);
 			process_object(game,0);
@@ -175,14 +177,18 @@ void game_render(PacmanGame *game)
 	static unsigned godDt = 0;
 	static bool godChange = false;
 
+
 	//common stuff that is rendered in every mode:
 	// 1up + score, highscore, base b록oard, lives, small pellets, fruit indicators
 	draw_common_oneup(true, game->pacman[0].score);// #8 Kim : 1.
-	if(game->playMode!=Single) draw_common_twoup(true, game->pacman[1].score);//#37 Yang: 2P UI 추가 - 점수 나오도록
-	draw_common_highscore(game->highscore);
+	if(game->playMode==Multi_TA) draw_common_twoup(true, game->pacman[1].score,0);//#37 Yang: 2P UI 추가 - 점수 나오도록
+	else if(game->playMode!=Single)draw_common_twoup(true,game->pacman[1].score,1);
+	if(game->playMode!=Multi_TA)draw_common_highscore(game->highscore);
+	if(game->playMode==Multi_TA) draw_game_time((game->time-ticks_game()+game->get_ticks)/1000);
 	//#37 Yang :2P UI 추가 생명 나오도
-	if(game->playMode!=Single) draw_pacman_lives(game->pacman[0].livesLeft,game->pacman[1].livesLeft);
-	else draw_pacman_lives(game->pacman[0].livesLeft,0);// #8 Kim : 1. 2p도 추가해줘야할듯!
+	if(game->playMode==Multi_TA) draw_pacman_lives(game->pacman[0].livesLeft,game->pacman[1].livesLeft,0);
+	else if(game->playMode!=Single)draw_pacman_lives(game->pacman[0].livesLeft,game->pacman[1].livesLeft,1);
+	else draw_pacman_lives(game->pacman[0].livesLeft,0,0);// #8 Kim : 1. 2p도 추가해줘야할듯!
 
 	draw_small_pellets(&game->pelletHolder);
 	if(game->playMode!=Multi)draw_fruit_indicators(game->currentLevel);
@@ -196,6 +202,8 @@ void game_render(PacmanGame *game)
 		case GameBeginState:
 			draw_game_playerone_start();
 			draw_game_ready();
+			game->time=11000;
+			game->get_ticks=ticks_game();
 
 			draw_large_pellets(&game->pelletHolder, false);
 			draw_board(&game->board);
@@ -208,8 +216,9 @@ void game_render(PacmanGame *game)
 			if(game->playMode!=Single)// #13 Kim : 1. play Mode 에 따라서 추가
 				draw_pacman_static(&game->pacman[1]);// #8 Kim : 2. pacman 2도 그려보자~~
 			//#28 Yang : 1.난이도 조절 ghost 수 조절
-			for(int i = 0; i < ghost_number(game->currentLevel); i++) draw_ghost(&game->ghosts[i]);
-
+			for(int i = 0; i < ghost_number(game->currentLevel); i++) draw_ghost(&game->ghosts[0][i]);
+			if(game->playMode==Multi_TA)
+				for(int i=0;i<ghost_number(game->currentLevel);i++) draw_ghost(&game->ghosts[1][i]);
 			draw_large_pellets(&game->pelletHolder, false);
 			draw_board(&game->board);
 			break;
@@ -217,75 +226,111 @@ void game_render(PacmanGame *game)
 			draw_pacman_static(&game->pacman[0]);// #8 Kim : 1.
 			if (game->playMode!=Single)
 				draw_pacman_static(&game->pacman[1]);
-			for (int i = 0; i < ghost_number(game->currentLevel); i++) draw_ghost(&game->ghosts[i]);
-
+			for (int i = 0; i < ghost_number(game->currentLevel); i++) draw_ghost(&game->ghosts[0][i]);
+			if(game->playMode==Multi_TA)
+				for(int i=0;i<ghost_number(game->currentLevel);i++) draw_ghost(&game->ghosts[1][i]);
 			draw_large_pellets(&game->pelletHolder, false);
 			draw_board(&game->board);
 			break;
 		case ReviveState2:
 			draw_pacman_static(&game->pacman[1]);// #8 Kim : 1.
 			draw_pacman_static(&game->pacman[0]);
-			for (int i = 0; i < ghost_number(game->currentLevel); i++) draw_ghost(&game->ghosts[i]);
-
+			for (int i = 0; i < ghost_number(game->currentLevel); i++) draw_ghost(&game->ghosts[0][i]);
+			if(game->playMode==Multi_TA)
+				for(int i=0;i<ghost_number(game->currentLevel);i++) draw_ghost(&game->ghosts[1][i]);
 			draw_large_pellets(&game->pelletHolder, false);
 			draw_board(&game->board);
 			break;
 		case GamePlayState:
+
+			if(ticks_game()%100==0)game->time--;
 			draw_large_pellets(&game->pelletHolder, true);
 			draw_board(&game->board);
 
-			if (game->gameFruit1.fruitMode == Displaying) draw_fruit_game(game->currentLevel, &game->gameFruit1);
-			if (game->gameFruit2.fruitMode == Displaying) draw_fruit_game(game->currentLevel, &game->gameFruit2);
-			if (game->gameFruit3.fruitMode == Displaying) draw_fruit_game(game->currentLevel, &game->gameFruit3);
-			if (game->gameFruit4.fruitMode == Displaying) draw_fruit_game(game->currentLevel, &game->gameFruit4);
-			if (game->gameFruit5.fruitMode == Displaying) draw_fruit_game(game->currentLevel, &game->gameFruit5);
-
-			if (game->gameFruit1.eaten && ticks_game() - game->gameFruit1.eatenAt < 2000) draw_fruit_pts(&game->gameFruit1);
-			if (game->gameFruit2.eaten && ticks_game() - game->gameFruit2.eatenAt < 2000) draw_fruit_pts(&game->gameFruit2);
-			if (game->gameFruit3.eaten && ticks_game() - game->gameFruit3.eatenAt < 2000) draw_fruit_pts(&game->gameFruit3);
-			if (game->gameFruit4.eaten && ticks_game() - game->gameFruit4.eatenAt < 2000) draw_fruit_pts(&game->gameFruit4);
-			if (game->gameFruit5.eaten && ticks_game() - game->gameFruit5.eatenAt < 2000) draw_fruit_pts(&game->gameFruit5);
+			for(int i=0;i<5;i++){
+				if (game->gameFruit[0][i].fruitMode == Displaying) draw_fruit_game(game->currentLevel, &game->gameFruit[0][i]);
+				if (game->gameFruit[0][i].eaten && ticks_game() - game->gameFruit[0][i].eatenAt < 2000) draw_fruit_pts(&game->gameFruit[0][i]);
+			}
 
 			// #5 Yang : 3.object 표시
-			if (game->gameObject1.objectMode == Displaying_obj) draw_object_game(game->currentLevel, &game->gameObject1);
-			if (game->gameObject2.objectMode == Displaying_obj) draw_object_game(game->currentLevel, &game->gameObject2);
-			if (game->gameObject3.objectMode == Displaying_obj) draw_object_game(game->currentLevel, &game->gameObject3);
+			for(int i=0;i<3;i++){
+				if (game->gameObject[0][i].objectMode == Displaying_obj) draw_object_game(game->currentLevel, &game->gameObject[0][i]);
+			}
 			// #8 Kim : 1.
 			draw_pacman(&game->pacman[0]);
 			// #8 Kim : 2.
 			if(game->playMode!=Single)// #13 Kim : 1. play Mode 에 따라서 추가
 				draw_pacman(&game->pacman[1]);
 
+
 			if(game->pacman[0].godMode == false) {
 				for (int i = 0; i < ghost_number(game->currentLevel); i++) {
-					if(game->ghosts[i].isDead == 1) {
-						draw_eyes(&game->ghosts[i]);
+					if(game->ghosts[0][i].isDead == 1) {
+						draw_eyes(&game->ghosts[0][i]);
 					} else
-						draw_ghost(&game->ghosts[i]);
+						draw_ghost(&game->ghosts[0][i]);
+					//if(game->playMode==Multi_TA) draw_ghost(&game->ghosts[1][i]);
 				}
 
-			} else {
+			}
+			else {
 				if(godChange == false) {
 					game->pacman[0].originDt = ticks_game();
 					godChange = true;
 				}
 				godDt = ticks_game() - game->pacman[0].originDt;
 				for (int i = 0; i < ghost_number(game->currentLevel); i++) {
-					if(game->ghosts[i].isDead == 1) {
-						draw_eyes(&game->ghosts[i]);
-					} else if(draw_scared_ghost(&game->ghosts[i], godDt)){
+					if(game->ghosts[0][i].isDead == 1) {
+						draw_eyes(&game->ghosts[0][i]);
+					} else if(draw_scared_ghost(&game->ghosts[0][i], godDt)){
 						// nothing
-						if(game->ghosts[i].isDead == 2) {
-							draw_ghost(&game->ghosts[i]);
+						if(game->ghosts[0][i].isDead == 2) {
+							draw_ghost(&game->ghosts[0][i]);
 						}
 					} else {
 						game->pacman[0].godMode = false;
 						godChange = false;
-						if(game->ghosts[i].isDead == 2)
-							game->ghosts[i].isDead = 0;
+						if(game->ghosts[0][i].isDead == 2)
+							game->ghosts[0][i].isDead = 0;
 					}
 				}
 			}
+			if(game->playMode==Multi_TA){
+				if(game->pacman[1].godMode == false) {
+					for (int i = 0; i < ghost_number(game->currentLevel); i++) {
+						if(game->ghosts[1][i].isDead == 1) {
+							draw_eyes(&game->ghosts[1][i]);
+						} else
+							draw_ghost(&game->ghosts[1][i]);
+						//if(game->playMode==Multi_TA) draw_ghost(&game->ghosts[1][i]);
+					}
+
+				}
+				else {
+					if(godChange == false) {
+						game->pacman[1].originDt = ticks_game();
+						godChange = true;
+					}
+					godDt = ticks_game() - game->pacman[1].originDt;
+					for (int i = 0; i < ghost_number(game->currentLevel); i++) {
+						if(game->ghosts[1][i].isDead == 1) {
+							draw_eyes(&game->ghosts[1][i]);
+						} else if(draw_scared_ghost(&game->ghosts[1][i], godDt)){
+							// nothing
+							if(game->ghosts[0][i].isDead == 2) {
+								draw_ghost(&game->ghosts[1][i]);
+							}
+						} else {
+							game->pacman[1].godMode = false;
+							godChange = false;
+							if(game->ghosts[1][i].isDead == 2)
+								game->ghosts[1][i].isDead = 0;
+						}
+					}
+				}
+				if((int)(game->time-ticks_game()+game->get_ticks)<0) game->gameState=GameoverState;
+			}
+
 			break;
 		case WinState:
 
@@ -294,7 +339,9 @@ void game_render(PacmanGame *game)
 			else{
 			if (dt < 2000)
 			{
-				for (int i = 0; i < ghost_number(game->currentLevel); i++) draw_ghost(&game->ghosts[i]);
+				for (int i = 0; i < ghost_number(game->currentLevel); i++) draw_ghost(&game->ghosts[0][i]);
+				if(game->playMode==Multi_TA)
+					for(int i=0;i<ghost_number(game->currentLevel);i++) draw_ghost(&game->ghosts[1][i]);
 				draw_board(&game->board);
 			}
 			else
@@ -313,7 +360,9 @@ void game_render(PacmanGame *game)
 				draw_pacman_static(&game->pacman[0]);
 				if (game->playMode!=Single)// #14
 					draw_pacman_static(&game->pacman[1]);
-				for (int i = 0; i < ghost_number(game->currentLevel); i++) draw_ghost(&game->ghosts[i]);
+				for (int i = 0; i < ghost_number(game->currentLevel); i++) draw_ghost(&game->ghosts[0][i]);
+				if(game->playMode==Multi_TA)
+					for(int i=0;i<ghost_number(game->currentLevel);i++) draw_ghost(&game->ghosts[1][i]);
 			}
 			else
 			{
@@ -334,7 +383,9 @@ void game_render(PacmanGame *game)
 				//TODO: this actually draws the last frame pacman was on when he died
 				draw_pacman_static(&game->pacman[1]);
 				draw_pacman_static(&game->pacman[0]);
-				for (int i = 0; i < 4; i++) draw_ghost(&game->ghosts[i]);
+				for (int i = 0; i < 4; i++) draw_ghost(&game->ghosts[0][i]);
+				if(game->playMode==Multi_TA)
+					for(int i=0;i<ghost_number(game->currentLevel);i++) draw_ghost(&game->ghosts[1][i]);
 			}
 			else
 			{	//#14 Kim : 2. 이 부분에서 ~ pac맨 그려준다요 그래서 부딪히고 죽는 모션에서 다른 플레이어도 출력하게끔 했음
@@ -350,11 +401,20 @@ void game_render(PacmanGame *game)
 			//#31 Yang : 점수로 승부판정모드 - 일단 멀티모드 자체를 점수 높으면 이기는 걸로 수정
 			if(game->playMode!=Single){
 				if(game->pacman[0].score>game->pacman[1].score&&game->pacman[0].livesLeft)
-					draw_game_playerone_win();
-				else if(game->pacman[0].score<game->pacman[1].score&&game->pacman[1].livesLeft)
-					draw_game_playertwo_win();
-				else if(game->pacman[0].livesLeft==0) draw_game_playertwo_win();
-				else draw_game_playerone_win();
+					if(game->playMode==Multi_TA) draw_game_playerone_win(1);
+					else draw_game_playerone_win(0);
+				else if(game->pacman[0].score<game->pacman[1].score&&game->pacman[1].livesLeft){
+					if(game->playMode==Multi_TA) draw_game_playertwo_win(1);
+					else draw_game_playertwo_win(0);
+				}
+				else if(game->pacman[0].livesLeft==0) {
+					if(game->playMode==Multi_TA) draw_game_playertwo_win(1);
+					else draw_game_playertwo_win(0);
+				}
+				else {
+					if(game->playMode==Multi_TA) draw_game_playerone_win(1);
+					else draw_game_playerone_win(0);
+				}
 				break;
 			}
 			draw_game_gameover();
@@ -564,14 +624,14 @@ static void process_player(PacmanGame *game,int player_num)
 		return;
 	}
 
-	resolve_telesquare(&pacman->body);
+	resolve_telesquare(&pacman->body,player_num);
 }
 
-static void process_ghosts(PacmanGame *game)
+static void process_ghosts(PacmanGame *game, int flag)
 {
 	for (int i = 0; i < ghost_number(game->currentLevel); i++)//#26 Yang : 1. 난이도 조절 - 고스트 수 조절
 	{
-		Ghost *g = &game->ghosts[i];
+		Ghost *g = &game->ghosts[flag][i];
 
 		if (g->movementMode == InPen)
 		{
@@ -600,12 +660,12 @@ static void process_ghosts(PacmanGame *game)
 
 		//all other modes can move normally (I think)
 		MovementResult result = move_ghost(&g->body);
-		resolve_telesquare(&g->body);
+		resolve_telesquare(&g->body,flag);
 
 		if (result == NewSquare)
 		{
 			//if they are in a new tile, rerun their target update logic
-			execute_ghost_logic(g, g->ghostType, &game->ghosts[0], &game->pacman[0]);// #8 Kim : 1.
+			execute_ghost_logic(g, g->ghostType, &game->ghosts[0], &game->pacman[flag]);// #8 Kim : 1.
 
 			g->nextDirection = next_direction(g, &game->board);
 		}
@@ -622,107 +682,105 @@ static void process_ghosts(PacmanGame *game)
 static void process_fruit(PacmanGame *game, int playernum)//#5 Yang : 5. playernum 추가
 {
 	int pelletsEaten = game->pelletHolder.totalNum - game->pelletHolder.numLeft;
+	GameFruit *f[5];
+	unsigned int fdt[5];
+	for(int i=0;i<5;i++){
+		f[i]=&game->gameFruit[0][i];
+	}
 
-	GameFruit *f1 = &game->gameFruit1;
-	GameFruit *f2 = &game->gameFruit2;
-	GameFruit *f3 = &game->gameFruit3;
-	GameFruit *f4 = &game->gameFruit4;
-	GameFruit *f5 = &game->gameFruit5;
 
 	int curLvl = game->currentLevel;
 
-	if (pelletsEaten >= 30 && f1->fruitMode == NotDisplaying)
+	if (pelletsEaten >= 30 && f[0]->fruitMode == NotDisplaying)
 	{
-		f1->fruitMode = Displaying;
-		regen_fruit(f1, curLvl);
+		f[0]->fruitMode = Displaying;
+		regen_fruit(f[0], curLvl);
 	}
-	else if (pelletsEaten == 60 && f2->fruitMode == NotDisplaying)
+	else if (pelletsEaten == 60 && f[1]->fruitMode == NotDisplaying)
 	{
-		f2->fruitMode = Displaying;
-		regen_fruit(f2, curLvl);
+		f[1]->fruitMode = Displaying;
+		regen_fruit(f[1], curLvl);
 	}
-	else if (pelletsEaten == 90 && f3->fruitMode == NotDisplaying)
+	else if (pelletsEaten == 90 && f[2]->fruitMode == NotDisplaying)
 	{
-		f3->fruitMode = Displaying;
-		regen_fruit(f3, curLvl);
+		f[2]->fruitMode = Displaying;
+		regen_fruit(f[2], curLvl);
 	}
-	else if (pelletsEaten == 120 && f4->fruitMode == NotDisplaying)
+	else if (pelletsEaten == 120 && f[3]->fruitMode == NotDisplaying)
 	{
-		f4->fruitMode = Displaying;
-		regen_fruit(f4, curLvl);
+		f[3]->fruitMode = Displaying;
+		regen_fruit(f[3], curLvl);
 	}
-	else if (pelletsEaten == 150 && f5->fruitMode == NotDisplaying)
+	else if (pelletsEaten == 150 && f[4]->fruitMode == NotDisplaying)
 	{
-		f5->fruitMode = Displaying;
-		regen_fruit(f5, curLvl);
+		f[4]->fruitMode = Displaying;
+		regen_fruit(f[4], curLvl);
 	}
 
-	unsigned int f1dt = ticks_game() - f1->startedAt;
-	unsigned int f2dt = ticks_game() - f2->startedAt;
-	unsigned int f3dt = ticks_game() - f3->startedAt;
-	unsigned int f4dt = ticks_game() - f4->startedAt;
-	unsigned int f5dt = ticks_game() - f5->startedAt;
+	for(int i=0;i<5;i++){
+		fdt[i]= ticks_game()-f[i]->startedAt;
+	}
 
 	Pacman *pac = &game->pacman[playernum];
 
-	if (f1->fruitMode == Displaying)
+	if (f[0]->fruitMode == Displaying)
 	{
-		if (f1dt > f1->displayTime) f1->fruitMode = Displayed;
+		if (fdt[0] > f[0]->displayTime) f[0]->fruitMode = Displayed;
 	}
-	if (f2->fruitMode == Displaying)
+	if (f[1]->fruitMode == Displaying)
 	{
-		if (f2dt > f2->displayTime) f2->fruitMode = Displayed;
+		if (fdt[1] > f[1]->displayTime) f[1]->fruitMode = Displayed;
 	}
-	if (f3->fruitMode == Displaying)
+	if (f[2]->fruitMode == Displaying)
 		{
-			if (f3dt > f3->displayTime) f3->fruitMode = Displayed;
+			if (fdt[2] > f[2]->displayTime) f[2]->fruitMode = Displayed;
 		}
-	if (f4->fruitMode == Displaying)
+	if (f[3]->fruitMode == Displaying)
 		{
-			if (f4dt > f4->displayTime) f4->fruitMode = Displayed;
+			if (fdt[3] > f[3]->displayTime) f[3]->fruitMode = Displayed;
 		}
-	if (f5->fruitMode == Displaying)
+	if (f[4]->fruitMode == Displaying)
 		{
-			if (f5dt > f5->displayTime) f5->fruitMode = Displayed;
+			if (fdt[4] > f[4]->displayTime) f[4]->fruitMode = Displayed;
 		}
 
 	//check for collisions
 
-	if (f1->fruitMode == Displaying && collides_obj(&pac->body, f1->x, f1->y))
+	if (f[0]->fruitMode == Displaying && collides_obj(&pac->body, f[0]->x, f[0]->y))
 	{
-		f1->fruitMode = Displayed;
-		f1->eaten = true;
-		f1->eatenAt = ticks_game();
-		pac->score += fruit_points(f1->fruit);
+		f[0]->fruitMode = Displayed;
+		f[0]->eaten = true;
+		f[0]->eatenAt = ticks_game();
+		pac->score += fruit_points(f[0]->fruit);
 	}
 
-	if (f2->fruitMode == Displaying && collides_obj(&pac->body, f2->x, f2->y))
+	if (f[1]->fruitMode == Displaying && collides_obj(&pac->body, f[1]->x, f[1]->y))
 	{
-		f2->fruitMode = Displayed;
-		f2->eaten = true;
-		f2->eatenAt = ticks_game();
-		pac->score += fruit_points(f2->fruit);
+		f[1]->fruitMode = Displayed;
+		f[1]->eaten = true;
+		f[1]->eatenAt = ticks_game();
+		pac->score += fruit_points(f[1]->fruit);
 	}
-	if (f3->fruitMode == Displaying && collides_obj(&pac->body, f3->x, f3->y))
+	if (f[2]->fruitMode == Displaying && collides_obj(&pac->body, f[2]->x, f[2]->y))
 	{
-		f3->fruitMode = Displayed;
-		f3->eaten = true;
-		f3->eatenAt = ticks_game();
-		pac->score += fruit_points(f3->fruit);
+		f[2]->fruitMode = Displayed;
+		f[2]->eaten = true;
+		f[2]->eatenAt = ticks_game();
+		pac->score += fruit_points(f[2]->fruit);
 	}
-	if (f4->fruitMode == Displaying && collides_obj(&pac->body, f4->x, f4->y))
+	if (f[3]->fruitMode == Displaying && collides_obj(&pac->body, f[3]->x, f[3]->y))
 	{
-		f4->fruitMode = Displayed;
-		f4->eaten = true;
-		f4->eatenAt = ticks_game();
-		pac->score += fruit_points(f4->fruit);
+		f[3]->fruitMode = Displayed;
+		f[3]->eaten = true;
+		f[3]->eatenAt = ticks_game();
+		pac->score += fruit_points(f[3]->fruit);
 	}
-	if (f5->fruitMode == Displaying && collides_obj(&pac->body, f5->x, f5->y))
+	if (f[4]->fruitMode == Displaying && collides_obj(&pac->body, f[4]->x, f[4]->y))
 	{
-		f5->fruitMode = Displayed;
-		f5->eaten = true;
-		f5->eatenAt = ticks_game();
-		pac->score += fruit_points(f5->fruit);
+		f[4]->fruitMode = Displayed;
+		f[4]->eaten = true;
+		f[4]->eatenAt = ticks_game();
+		pac->score += fruit_points(f[4]->fruit);
 	}
 
 }
@@ -731,84 +789,80 @@ static void process_fruit(PacmanGame *game, int playernum)//#5 Yang : 5. playern
 static void process_object(PacmanGame *game, int playernum)//#5 Yang : 5.process_object에 playernum 변수 추가
 {
 	int pelletsEaten = game->pelletHolder.totalNum - game->pelletHolder.numLeft;
-
-	GameObject *o1 = &game->gameObject1;
-	GameObject *o2 = &game->gameObject2;
-	GameObject *o3 = &game->gameObject3;
-
-	int curLvl = game->currentLevel;
-
-	if (pelletsEaten >= 50 && o1->objectMode == NotDisplaying_obj)
-	{
-		o1->objectMode = Displaying_obj;
-		regen_object(o1);
+	GameObject *o[3];
+	for(int i=0;i<3;i++){
+		o[i]=&game->gameObject[0][i];
 	}
-	else if (pelletsEaten >= 100 && o2->objectMode == NotDisplaying_obj)
-	{
-		o2->objectMode = Displaying_obj;
-		regen_object(o2);
-	}
-	else if (pelletsEaten >= 150 && o3->objectMode == NotDisplaying_obj)
-	{
-		o3->objectMode = Displaying_obj;
-		regen_object(o3);
-	}
-	unsigned int o1dt = ticks_game() - o1->startedAt;
-	unsigned int o2dt = ticks_game() - o2->startedAt;
-	unsigned int o3dt = ticks_game() - o3->startedAt;
 
+	if (pelletsEaten >= 50 && o[0]->objectMode == NotDisplaying_obj)
+	{
+		o[0]->objectMode = Displaying_obj;
+		regen_object(o[0]);
+	}
+	else if (pelletsEaten >= 100 && o[1]->objectMode == NotDisplaying_obj)
+	{
+		o[1]->objectMode = Displaying_obj;
+		regen_object(o[1]);
+	}
+	else if (pelletsEaten >= 150 && o[2]->objectMode == NotDisplaying_obj)
+	{
+		o[2]->objectMode = Displaying_obj;
+		regen_object(o[2]);
+	}
+	unsigned int odt[3];
+	for(int i=0;i<3;i++) odt[i] = ticks_game()-o[i]->startedAt;
 
 
 	Pacman *pac = &game->pacman[playernum];
 
-	if (o1->objectMode == Displaying_obj)
+	if (o[0]->objectMode == Displaying_obj)
 	{
-		if (o1dt > o1->displayTime) o1->objectMode = Displayed_obj;
+		if (odt[0] > o[0]->displayTime) o[0]->objectMode = Displayed_obj;
 	}
-	if (o2->objectMode == Displaying_obj)
+	if (o[1]->objectMode == Displaying_obj)
 	{
-		if (o2dt > o2->displayTime) o2->objectMode = Displayed_obj;
-	}if (o3->objectMode == Displaying_obj)
+		if (odt[1] > o[1]->displayTime) o[1]->objectMode = Displayed_obj;
+	}if (o[2]->objectMode == Displaying_obj)
 	{
-		if (o3dt > o3->displayTime) o3->objectMode = Displayed_obj;
+		if (odt[2] > o[2]->displayTime) o[2]->objectMode = Displayed_obj;
 	}
 
-	if (o1->objectMode == Displaying_obj && collides_obj(&pac->body, o1->x, o1->y))
+	if (o[0]->objectMode == Displaying_obj && collides_obj(&pac->body, o[0]->x, o[0]->y))
 	{
-		o1->objectMode = Displayed_obj;
-		o1->eaten = true;
-		o1->eatenAt = ticks_game();
-		game_object_function(o1,game, playernum);
+		o[0]->objectMode = Displayed_obj;
+		o[0]->eaten = true;
+		o[0]->eatenAt = ticks_game();
+		game_object_function(o[0],game, playernum);
 	}
-	if (o2->objectMode == Displaying_obj && collides_obj(&pac->body, o2->x, o2->y))
+	if (o[1]->objectMode == Displaying_obj && collides_obj(&pac->body, o[1]->x, o[1]->y))
 	{
-		o2->objectMode = Displayed_obj;
-		o2->eaten = true;
-		o2->eatenAt = ticks_game();
-		game_object_function(o2,game,playernum);
+		o[1]->objectMode = Displayed_obj;
+		o[1]->eaten = true;
+		o[1]->eatenAt = ticks_game();
+		game_object_function(o[1],game,playernum);
 	}
-	if (o3->objectMode == Displaying_obj && collides_obj(&pac->body, o3->x, o3->y))
+	if (o[2]->objectMode == Displaying_obj && collides_obj(&pac->body, o[2]->x, o[2]->y))
 	{
-		o3->objectMode = Displayed_obj;
-		o3->eaten = true;
-		o3->eatenAt = ticks_game();
-		game_object_function(o3,game,playernum);
+		o[2]->objectMode = Displayed_obj;
+		o[2]->eaten = true;
+		o[2]->eatenAt = ticks_game();
+		game_object_function(o[2],game,playernum);
 	}
 	//#5 Yang : 4. object 기능 구현
-	unsigned int o1et = ticks_game() - o1->eatenAt;
-	unsigned int o2et = ticks_game() - o2->eatenAt;
-	unsigned int o3et = ticks_game() - o3->eatenAt;
-	if (o1->eaten)
+	unsigned int oet[3];
+	for (int i=0;i<3;i++) oet[i] = ticks_game()-o[i]->eatenAt;
+
+	if (o[0]->eaten)
 	{
-		if (o1et > 5000) {game_object_function_end(o1,game,playernum);		o1->eaten = false;}
+		if (oet[0] > 5000) {game_object_function_end(o[0],game,playernum);		o[0]->eaten = false;}
 	}
-	if (o2->eaten)
+	if (o[1]->eaten)
 	{
-		if (o2et > 5000) {game_object_function_end(o2,game,playernum);		o2->eaten = false;}
+		if (oet[1] > 5000) {game_object_function_end(o[1],game,playernum);		o[1]->eaten = false;}
 	}
-	if (o3->eaten)
+	if (o[2]->eaten)
 	{
-		if (o3et > 5000) {game_object_function_end(o3,game,playernum);		o3->eaten = false;}
+		if (oet[2] > 5000) {game_object_function_end(o[2],game,playernum);		o[2]->eaten = false;}
 	}
 }
 static void process_pellets(PacmanGame *game,int player_num)
@@ -834,11 +888,24 @@ static void process_pellets(PacmanGame *game,int player_num)
 			p->eaten = true;
 			game->pacman[player_num].score += pellet_points(p);
 			if(pellet_check(p)) {
-				game->pacman[player_num].godMode = true;
-				game->pacman[player_num].originDt = ticks_game();
-				for(j = 0; j< 4; j++) {
-					if(game->ghosts[j].isDead == 2)
-						game->ghosts[j].isDead = 0;
+				//#35 Yang :버그 수정 : 2p모드에서 큰 필렛 먹었을 때 상대방에겐 적용안되던거 수정
+				if(game->playMode==Multi_TA){
+					game->pacman[player_num].godMode = true;
+					game->pacman[player_num].originDt = ticks_game();
+					for(j = 0; j< 4; j++) {
+						if(game->ghosts[player_num][j].isDead == 2)
+							game->ghosts[player_num][j].isDead = 0;
+
+					}
+				}else{
+					for(int k=0;k<2;k++){
+					game->pacman[k].godMode = true;
+					game->pacman[k].originDt = ticks_game();
+					}
+					for(j = 0; j< 4; j++) {
+						if(game->ghosts[0][j].isDead == 2)
+							game->ghosts[0][j].isDead = 0;
+					}
 				}
 			}
 			//play eat sound
@@ -855,9 +922,13 @@ static void process_pellets(PacmanGame *game,int player_num)
 
 static bool check_pacghost_collision(PacmanGame *game , int player_num)	//#14 Kim : 1. 일단 player 2개로 추가해보도록 함
 {
+
 	for (int i = 0; i < 4; i++)
 	{
-		Ghost *g = &game->ghosts[i];
+		Ghost *g[2];
+			for(int j=0;j<2;j++) {
+				g[j]=&game->ghosts[j][i];
+			}
 		/*
 		switch(g->ghostType) {
 		case Blinky : printf("red : %d \n", g->isDead); break;
@@ -866,14 +937,27 @@ static bool check_pacghost_collision(PacmanGame *game , int player_num)	//#14 Ki
 		case Pinky: printf("pink : %d \n", g->isDead); break;
 		}
 		*/
-
-		if (collides(&game->pacman[player_num].body, &g->body)) {
-			if(game->pacman[player_num].godMode == false)
-				return true;
-			else {
-				if(g->isDead == 2) {return true;}
-				g->isDead = 1;
-				death_send(g);
+		//#32 Yang: 자기 고스트에만 죽도록
+		if(game->playMode==Multi_TA){
+			if (collides(&game->pacman[player_num].body, &g[player_num]->body)) {
+				if(game->pacman[player_num].godMode == false)
+					return true;
+				else {
+					if(g[player_num]->isDead == 2) {return true;}
+					g[player_num]->isDead = 1;
+					death_send(g[player_num]);
+				}
+			}
+		}
+		else{
+			if (collides(&game->pacman[player_num].body, &g[0]->body)) {
+				if(game->pacman[player_num].godMode == false)
+					return true;
+				else {
+					if(g[0]->isDead == 2) {return true;}
+					g[0]->isDead = 1;
+					death_send(g[0]);
+				}
 			}
 		}
 	}
@@ -885,10 +969,11 @@ void gamestart_init(PacmanGame *game)
 {
 	level_init(game);
 
-	pacman_init(&game->pacman[0]);
+	pacman_init(&game->pacman[0],0);
 	// #8 Kim : 2. pacman init 부분도 추가
-	if(game->playMode!=Single)// #13 Kim : 1. play Mode 에 따라서 추가
-		pacman_init(&game->pacman[1]);
+	if(game->playMode==Multi_TA) pacman_init(&game->pacman[1],2);
+	else if(game->playMode!=Single)// #13 Kim : 1. play Mode 에 따라서 추가
+		pacman_init(&game->pacman[1],1);
 	//we need to reset all fruit
 	//fuit_init();
 	game->highscore = 0; //TODO maybe load this in from a file..?
@@ -916,20 +1001,15 @@ void level_init(PacmanGame *game)
 	pellets_init(&game->pelletHolder);
 
 	//reset ghosts
-	ghosts_init(game->ghosts, game->currentLevel);
+	ghosts_init(game->ghosts[0], game->currentLevel,0);
+	ghosts_init(game->ghosts[1],game->currentLevel,1);
+
 
 	//reset fruit
-	reset_fruit(&game->gameFruit1, &game->board);
-	reset_fruit(&game->gameFruit2, &game->board);
-	reset_fruit(&game->gameFruit3, &game->board);
-	reset_fruit(&game->gameFruit4, &game->board);
-	reset_fruit(&game->gameFruit5, &game->board);
+	for(int i=0;i<5;i++) reset_fruit(&game->gameFruit[0][i], &game->board);
 
 	//#5 Yang : 3.object reset
-	reset_object(&game->gameObject1, &game->board);
-	reset_object(&game->gameObject2, &game->board);
-	reset_object(&game->gameObject3, &game->board);
-
+	for(int i=0;i<3;i++) reset_object(&game->gameObject[0][i], &game->board);
 }
 
 void pacdeath_init(PacmanGame *game,int player_num) //#14 Kim : 2. 이 부분도 어떤 팩맨이 죽었는지 추가해줘야할듯 했지만 사실 필요는 없는듯.. 흠..여기서 점수관련한걸 해줘야하나
@@ -939,7 +1019,8 @@ void pacdeath_init(PacmanGame *game,int player_num) //#14 Kim : 2. 이 부분도
 	//		pacman_level_init(&game->pacman[1]); //#8 Kim : 2.level도 흠...
 	//따라서 윗 부분은 필요 없게됨.
 	// #14 Kim : 2. 그리고 죽어도 계속 진행 되고 있는거니까  그냥 init , reset 부분 지우거
-	ghosts_init(game->ghosts, game->currentLevel);
+	ghosts_init(game->ghosts[0], game->currentLevel,0);
+	ghosts_init(game->ghosts[1], game->currentLevel,1);
 	/*reset_fruit(&game->gameFruit1, &game->board);
 	reset_fruit(&game->gameFruit2, &game->board);
 	reset_fruit(&game->gameFruit3, &game->board);
@@ -974,7 +1055,7 @@ int int_length(int x)
     return 1;
 }
 
-static bool resolve_telesquare(PhysicsBody *body)
+static bool resolve_telesquare(PhysicsBody *body, int flag)//#
 {
 	//TODO: chuck this back in the board class somehow
 
@@ -982,8 +1063,10 @@ static bool resolve_telesquare(PhysicsBody *body)
 	{
 		if (body->y != 14) return false;
 
-		if (body->x == -1) { body->x = 55; return true; }
-		if (body->x == 56) { body->x =  0; return true; }
+		if (body->x == -1) { body->x = 27; return true; }
+		if (body->x == 28&&flag==0) { body->x = 0; return true; }
+		if (body->x == 28&&flag==1) { body->x = 55; return true; }
+		if (body->x == 56) { body->x = 29; return true; }
 
 		return false;
 	}
@@ -1004,8 +1087,10 @@ void game_object_function(GameObject *gameObject, PacmanGame *game, int playernu
 	switch(gameObject->object)
 	{
 	case Ghostslow:
-		for(int i=0;i<4;i++)
-			game->ghosts[i].body.velocity=50;
+		for(int i=0;i<4;i++){
+			if(game->playMode==Multi_TA)game->ghosts[playernum][i].body.velocity=50;
+			else game->ghosts[0][i].body.velocity=50;
+		}
 		return;
 	//#15 Yang : 1.생명추가 object 추가
 	case Life:
@@ -1026,9 +1111,12 @@ void game_object_function_end(GameObject *gameObject, PacmanGame *game, int play
 	switch(gameObject->object)
 	{
 	case Ghostslow:
-		for(int i=0;i<4;i++)
-			game->ghosts[i].body.velocity= ghost_speed_normal(game->currentLevel);
-	return;
+
+		for(int i=0;i<4;i++){
+			if(game->playMode==Multi_TA)game->ghosts[playernum][i].body.velocity=ghost_speed_normal(game->currentLevel);
+			else game->ghosts[0][i].body.velocity= ghost_speed_normal(game->currentLevel);
+		}
+		return;
 	case Life: return;
 	case God:
 			game->pacman[playernum].godMode=false;

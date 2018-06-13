@@ -5,8 +5,8 @@ typedef enum
 {
 	Nothing,
 	GoToGame,
-	LargeMap, // # 9 Dong : 확장맵 테스트
-	SmallMap, // # 9 Dong : 확장맵 테스트
+	TimeAttackMode, // # 9 Dong : 확장맵 테스트
+	ScoreMode, // # 9 Dong : 확장맵 테스트 //#32 Yang : smallMap LargeMap 이름 스코어모드 타임어택모드로 바꿈
 	GoToJoin,// #19 Kim : 1. 메뉴에서 눌렀을때 열로가려고 ..만들었음일단..
 	GoToMulti, // # 9 Dong : 확장맵 테스트
 	WaitClient,// #19 Kim : 2. 방만들기 했을 때 클라이언트 기다리기

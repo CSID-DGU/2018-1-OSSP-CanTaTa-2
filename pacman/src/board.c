@@ -9,12 +9,17 @@ bool is_valid_square(Board *board, int x, int y)
 	{
 		if (x < 0 || y < 0) return false;
 		if (x >= 56 || y >= 31) return false;
+		if(x==-1&&y!=14) return false;
+		if(x==28&&y!=14) return false;
+		if(x==56&&y!=14) return false;
 		return board->boardSquares[x][y].walkable;
 	}
 	else
 	{
 		if (x < 0 || y < 0) return false;
 		if (x >= 28 || y >= 31) return false;
+		if(x==0&&y!=14) return false;
+		if(x==27&&y!=14) return false;
 		return board->boardSquares[x][y].walkable;
 	}
 }

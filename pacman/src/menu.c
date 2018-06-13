@@ -117,14 +117,14 @@ int multi_mode_render(MenuSystem *menuSystem)// # 9 Dong : 확장맵 테스트�
 {
 	int get= getKey();
 
-	if(menuSystem->action == SmallMap)
+	if(menuSystem->action == ScoreMode)
 	{
 		menuSystem->playMode = Multi;
 		return 2;
 	}
-	else if(menuSystem->action == LargeMap)
+	else if(menuSystem->action == TimeAttackMode)
 	{
-		menuSystem->playMode = Multi;
+		menuSystem->playMode = Multi_TA;
 		return 3;
 	}
 
@@ -140,11 +140,11 @@ int multi_mode_render(MenuSystem *menuSystem)// # 9 Dong : 확장맵 테스트�
 	{
 		if(s_c_num == 0) // # 9 Dong : 2. 작은 맵
 		{
-			menuSystem->action=SmallMap;
+			menuSystem->action=ScoreMode;
 		}
 		else if(s_c_num == 1) // # 9 Dong : 2. 큰 맵
 		{
-			menuSystem->action=LargeMap;
+			menuSystem->action=TimeAttackMode;
 		}
 	}
 	draw_multi_mode(&s_c_num);
@@ -209,7 +209,7 @@ static void draw_info_screen(void)
 static void draw_player_info(void)
 {
 	draw_common_oneup(false, 0);
-	draw_common_twoup(false, 0);
+	draw_common_twoup(false, 0,0);
 	draw_common_highscore(0);
 
 	draw_credits(num_credits());
