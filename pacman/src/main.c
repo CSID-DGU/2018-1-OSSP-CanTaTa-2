@@ -19,7 +19,7 @@
 
 //Initializes all resources.
 static void resource_init(void);
-
+static void resource_init_Multi(void); // # 9 Dong : 2P 맵 연동을 위한 함수 , #35 : Dong : 디버깅 워닝메세지 출력을 막기위함.
 //Initialize all the internal entities needed for the game at startup.
 
 
@@ -55,12 +55,13 @@ static PacmanGame* recvPac;
 static bool gameRunning = true;
 static int numCredits = 0;
 static int Multi_flag = 0;
+static int Pragma = 0;
 
 int main(void)
 {
 	recvPac = (PacmanGame*)malloc(sizeof(PacmanGame));
 	resource_init();
-	game_init(1000);
+	game_init(0);
 
 	main_loop();
 
@@ -146,6 +147,8 @@ static void internal_tick(void)
 		}
 		if (is_game_over(&pacmanGame))
 		{
+			resource_init(); // #35 Dong : 다 꺤후 GUI가 계속 크게 있는 버그 수정 및 레벨 초기화
+			pacmanGame.currentLevel = 0;
 			menu_init(&menuSystem);
 			state = Menu;
 			pacmanGame.playMode = Single;
@@ -218,15 +221,16 @@ static void internal_render(void)
 void game_init2(int level) // # 9 Dong : 레벨별 맵 연동
 {
 	Multi_flag = 1;
-	char *Map_list[5] = {"maps/2pMap","maps/2pMap1","maps/2pMap2","maps/2pMap3","maps/2pMap4"};
+	const char *Map_list[5] = {"maps/2pMap","maps/2pMap1","maps/2pMap2","maps/2pMap3","maps/2pMap4"}; //#35 Dong : warnning 수정
 	int temp = 0;
 	temp = (level % 5);
 	//Load the board here. We only need to do it once
 
 	load_board(&pacmanGame.board, &pacmanGame.pelletHolder,Map_list[temp]); // #9 Dong : 레벨별 맵연동을 위한 추가
 
-	if(level == 1000) // #9 Dong : 처음 한번만 실행하도록
+	if(Pragma == 0) // #9 Dong : 처음 한번만 실행하도록
 	{
+	Pragma ++;
 	//set to be in menu
 	state = Menu;
 
@@ -239,15 +243,16 @@ void game_init2(int level) // # 9 Dong : 레벨별 맵 연동
 
 void game_init(int level) // # 9 Dong : 레벨별 맵 연동
 {
-	char *Map_list[5] = {"maps/encodedboard","maps/encodedboard1","maps/encodedboard2","maps/encodedboard3","maps/encodedboard4"};
+	const char *Map_list[5] = {"maps/encodedboard","maps/encodedboard1","maps/encodedboard2","maps/encodedboard3","maps/encodedboard4"};// #9 Dong : 레벨별 맵연동을 위한 추가
 	int temp = 0;
 	temp = (level % 5);
 	//Load the board here. We only need to do it once
 
 	load_board(&pacmanGame.board, &pacmanGame.pelletHolder,Map_list[temp]); // #9 Dong : 레벨별 맵연동을 위한 추가
 
-	if(level == 1000) // #9 Dong : 처음 한번만 실행하도록
+	if(Pragma == 0) // #9 Dong : 처음 한번만 실행하도록
 	{
+	Pragma++;
 	//set to be in menu
 	state = Menu;
 
