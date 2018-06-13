@@ -184,6 +184,10 @@ static void internal_render(void)
 			pacmanGame.playMode= menuSystem.playMode;
 			state=Menu;
 			break;
+		case ReturnMenu://그냥 return menu에선 둘다 초기값으로 초기화
+			pacmanGame.playMode = menuSystem.playMode=Single;
+			state=Menu;
+			break;
 		default:
 			break;
 		}
@@ -312,7 +316,6 @@ static void process_events(void)
 			break;
 		}
 	}
-
 	keyevents_finished();
 }
 
@@ -385,23 +388,23 @@ static void cp_pacman(PacmanGame* pac)
 	pacmanGame.pelletHolder.numLeft = pac->pelletHolder.numLeft;
 	pacmanGame.pelletHolder.totalNum = pac->pelletHolder.totalNum;
 	if(Multi_flags() == 1) // # 35 DOng : 버그 수정 펠렛먹으면 레벨 진행을 위함.
-	{
-		for(int i = 0 ; i <487; i++)
+	{//#35 Kim :  구석탱이 있는 펠렛 안먹어지는거 수정
+		for(int i = 0 ; i <488; i++)
 		{
 			cp_pellet(&pacmanGame.pelletHolder.pellets[i],&pac->pelletHolder.pellets[i]);
 		}
 	}
 	else
 	{
-		for(int i = 0 ; i <243; i++)
+		for(int i = 0 ; i <244; i++)
 		{
 			cp_pellet(&pacmanGame.pelletHolder.pellets[i],&pac->pelletHolder.pellets[i]);
 		}
 	}
+
 	for(int i=0;i<5;i++){
 		pacmanGame.gameFruit[0][i]=pac->gameFruit[0][i];
 		pacmanGame.gameObject[0][i]=pac->gameObject[0][i];
 	}
-
 
 }

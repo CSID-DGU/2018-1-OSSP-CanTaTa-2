@@ -13,8 +13,8 @@
 
 //
 void draw_online_mode(int *s_c_num ,char* tmp);//#19 Kim : 2.menu.c 에있는거 열로 옮겼음
-void draw_input_string(const char tmp[]);//#19 Kim : 2. 클라이언트 기다리는거 화면 추가. 이름을 맞게 바꿔줌
-
+void draw_input_string(const char tmp[],int x,int y);//#19 Kim : 2. 클라이언트 기다리는거 화면 추가. 이름을 맞게 바꿔줌
+void draw_multi_mode(int *s_c_num);
 //draws an image at a board coordinate
 void draw_image_coord(SDL_Surface *surface, int x, int y);
 void draw_image_coord_offset(SDL_Surface *surface, int x, int y, int xOffset, int yOffset);
@@ -727,10 +727,12 @@ void draw_online_mode(int *s_c_num ,char* tmp)//#19 Kim : 1. 일단 메뉴에서
 		break;
 	}
 }
-void draw_input_string(const char tmp[])
+void draw_input_string(const char tmp[],int x,int y)
 {// #20 Kim : 1. 편하게 쓰기위해서 매개변수로 메세지 맘대로 할수있게
+	// #35 Kim 이거 한 이유는 그냥 앞에 set color 랑 텍스트 써주는거 매번 두개쓰기싫어섬임.
 	set_text_color(WhiteText);
-	draw_text_coord(get_screen(), tmp, 4, 15);
+	draw_text_coord(get_screen(), tmp, x, y);
+
 }
 
 

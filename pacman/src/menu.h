@@ -10,7 +10,8 @@ typedef enum
 	GoToJoin,// #19 Kim : 1. 메뉴에서 눌렀을때 열로가려고 ..만들었음일단..
 	GoToMulti, // # 9 Dong : 확장맵 테스트
 	WaitClient,// #19 Kim : 2. 방만들기 했을 때 클라이언트 기다리기
-	JoinServer // #25 join room 선택시 이액션
+	JoinServer, // #25 join room 선택시 이액션
+	ReturnMenu // #35 make 룸에서 백스페이스 키시 이액션
 } MenuAction;
 
 //Defines the menu system.
