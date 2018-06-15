@@ -404,6 +404,8 @@ static void cp_pacman(PacmanGame* pac)
 
 	for(int i=0;i<5;i++){
 		pacmanGame.gameFruit[0][i]=pac->gameFruit[0][i];
+	}
+	for(int i=0;i<3;i++){
 		pacmanGame.gameObject[0][i]=pac->gameObject[0][i];
 	}
 
