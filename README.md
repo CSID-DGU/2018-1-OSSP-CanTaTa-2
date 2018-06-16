@@ -4,7 +4,7 @@
 
 
 
-### 팀원
+## 팀원
 
 - 2013111999 김성준
 - 2014112062 양준현
@@ -12,7 +12,17 @@
 
 
 
-### 협업 홈페이지
+## Description
+
+* 동국대학교 컴퓨터공학과 공개SW프로젝트 2018-1 학기 프로젝트 원격저장소.
+  * 리눅스 SDL을 이용한 Pacman Game
+  * 소스코드 출처
+    * Pacman_original  : <https://github.com/TroyShaw/Pacman>  
+    * Pacman_2017_ver : https://github.com/CSID-DGU/2017-2-OSSP-Awkward-3
+
+
+
+## 협업 홈페이지
 
 * http://13.125.138.114
 
@@ -89,3 +99,6 @@ sudo apt-get install libsdl-image1.2 libsdl-gfx1.2-5 libsdl1.2-dev
 
 
 
+## License
+
+This project is licensed under the MIT License - see the [pacman/LICENSE.md](pacman/LICENSE.md) file for details
