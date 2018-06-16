@@ -437,7 +437,7 @@ void draw_large_pellets(PelletHolder *ph, bool flashing)
 //
 //
 
-void draw_pacman(Pacman *pacman)
+void draw_pacman(Pacman *pacman, int num)
 {
 	int frame;
 
@@ -466,22 +466,31 @@ void draw_pacman(Pacman *pacman)
 	int xOffset = pacman->body.xOffset - 4;
 	int yOffset = offset + pacman->body.yOffset - 4;
 
-	if(!pacman->boostOn) {
-		draw_image_coord_offset(pacman_ani_image(aniDir, frame), pacman->body.x, pacman->body.y, xOffset, yOffset);
-	} else {
-		draw_image_coord_offset(pacman_ani_boost_image(aniDir, frame), pacman->body.x, pacman->body.y, xOffset, yOffset);
+	if(!num){
+		if(!pacman->boostOn) {
+			draw_image_coord_offset(pacman_ani_image(aniDir, frame), pacman->body.x, pacman->body.y, xOffset, yOffset);
+		} else {
+			draw_image_coord_offset(pacman_ani_boost_image(aniDir, frame), pacman->body.x, pacman->body.y, xOffset, yOffset);
+		}
+	}else{
+		if(!pacman->boostOn) {
+			draw_image_coord_offset(pacman_ani_image2(aniDir, frame), pacman->body.x, pacman->body.y, xOffset, yOffset);
+		} else {
+			draw_image_coord_offset(pacman_ani_boost_image(aniDir, frame), pacman->body.x, pacman->body.y, xOffset, yOffset);
+		}
 	}
 }
 
-void draw_pacman_static(Pacman *pacman)
+void draw_pacman_static(Pacman *pacman, int num)
 {
 	int xOffset = pacman->body.xOffset - 4;
 	int yOffset = offset + pacman->body.yOffset - 6;
 
-	draw_image_coord_offset(pacman_image(), pacman->body.x, pacman->body.y, xOffset, yOffset);
+	if(!num) draw_image_coord_offset(pacman_image(), pacman->body.x, pacman->body.y, xOffset, yOffset);
+	else draw_image_coord_offset(pacman_image2(), pacman->body.x, pacman->body.y, xOffset, yOffset);
 }
 
-void draw_pacman_death(Pacman *pacman, unsigned int dt)
+void draw_pacman_death(Pacman *pacman, unsigned int dt, int num)
 {
 	//hangs on first image for 200ms
 	//cycles through rest of images at constant rate
@@ -494,28 +503,49 @@ void draw_pacman_death(Pacman *pacman, unsigned int dt)
 	int numFrames = 11;
 
 	SDL_Surface *image;
+	if(!num){
+		if (dt < hang1)
+		{
+			image = pacman_death_image(0);
+		}
+		else if (dt < (hang1 + numFrames * perFrame))
+		{
+			int i = animation_get_frame_dt(dt - hang1, perFrame, numFrames);
 
-	if (dt < hang1)
-	{
-		image = pacman_death_image(0);
-	}
-	else if (dt < (hang1 + numFrames * perFrame))
-	{
-		int i = animation_get_frame_dt(dt - hang1, perFrame, numFrames);
+			image = pacman_death_image(i);
+		}
+		else if (dt < (hang1 + numFrames * perFrame + hang2))
+		{
+			//draw last frame
+			image = pacman_death_image(10);
+		}
+		else
+		{
+			//draw nothing
+			return;
+		}
+	}else{
+		if (dt < hang1)
+		{
+			image = pacman_death_image2(0);
+		}
+		else if (dt < (hang1 + numFrames * perFrame))
+		{
+			int i = animation_get_frame_dt(dt - hang1, perFrame, numFrames);
 
-		image = pacman_death_image(i);
+			image = pacman_death_image2(i);
+		}
+		else if (dt < (hang1 + numFrames * perFrame + hang2))
+		{
+			//draw last frame
+			image = pacman_death_image2(10);
+		}
+		else
+		{
+			//draw nothing
+			return;
+		}
 	}
-	else if (dt < (hang1 + numFrames * perFrame + hang2))
-	{
-		//draw last frame
-		image = pacman_death_image(10);
-	}
-	else
-	{
-		//draw nothing
-		return;
-	}
-
 	int xOffset = pacman->body.xOffset - 4;
 	int yOffset = offset + pacman->body.yOffset - 6;
 
@@ -538,7 +568,7 @@ void draw_pacman_lives(int numLives1, int numLives2,int flag)
 	}
 	for (int i = 0; i < numLives2; i++)
 		{
-			apply_surface(x2, y, pacman_life_image());
+			apply_surface(x2, y, pacman_life_image2());
 
 			x2 += 16 * 2;
 		}

@@ -86,9 +86,9 @@ void draw_large_pellets(PelletHolder *ph, bool flashing);
 // Pacman renderering
 //
 
-void draw_pacman(Pacman *pacman);
-void draw_pacman_static(Pacman *pacman);
-void draw_pacman_death(Pacman *pacman, unsigned int timeSinceDeath);
+void draw_pacman(Pacman *pacman, int num);
+void draw_pacman_static(Pacman *pacman, int num);
+void draw_pacman_death(Pacman *pacman, unsigned int timeSinceDeath, int num);
 void draw_pacman_lives(int numLives1, int numLives2, int flag);
 
 //

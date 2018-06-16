@@ -38,10 +38,14 @@ SDL_Surface* pts_white_image(void);
 SDL_Surface* pts_peach_image(void);
 
 SDL_Surface* pacman_image(void);
+SDL_Surface* pacman_image2(void);
 SDL_Surface* pacman_ani_image(Direction dir, int frame);
+SDL_Surface* pacman_ani_image2(Direction dir, int frame);
 SDL_Surface* pacman_ani_boost_image(Direction dir, int frame);
 SDL_Surface* pacman_death_image(int i);
 SDL_Surface* pacman_life_image(void);
+SDL_Surface* pacman_death_image2(int i);
+SDL_Surface* pacman_life_image2(void);
 
 SDL_Surface* ghost_image(GhostType type, Direction dir, int frame);
 SDL_Surface* scared_ghost_image(int frame);

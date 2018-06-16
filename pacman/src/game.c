@@ -212,9 +212,9 @@ void game_render(PacmanGame *game)
 			draw_game_ready();
 
 			//we also draw pacman and ghosts (they are idle currently though)
-			draw_pacman_static(&game->pacman[0]);// #8 Kim : 1.
+			draw_pacman_static(&game->pacman[0],0);// #8 Kim : 1.
 			if(game->playMode!=Single)// #13 Kim : 1. play Mode 에 따라서 추가
-				draw_pacman_static(&game->pacman[1]);// #8 Kim : 2. pacman 2도 그려보자~~
+				draw_pacman_static(&game->pacman[1],1);// #8 Kim : 2. pacman 2도 그려보자~~
 			//#28 Yang : 1.난이도 조절 ghost 수 조절
 			for(int i = 0; i < ghost_number(game->currentLevel); i++) draw_ghost(&game->ghosts[0][i]);
 			if(game->playMode==Multi_TA)
@@ -223,9 +223,9 @@ void game_render(PacmanGame *game)
 			draw_board(&game->board);
 			break;
 		case ReviveState1://#14 Kim : 2. ghost collision 후의 그냥 계속 진행 하게끔!!
-			draw_pacman_static(&game->pacman[0]);// #8 Kim : 1.
+			draw_pacman_static(&game->pacman[0],0);// #8 Kim : 1.
 			if (game->playMode!=Single)
-				draw_pacman_static(&game->pacman[1]);
+				draw_pacman_static(&game->pacman[1],1);
 			for (int i = 0; i < ghost_number(game->currentLevel); i++) draw_ghost(&game->ghosts[0][i]);
 			if(game->playMode==Multi_TA)
 				for(int i=0;i<ghost_number(game->currentLevel);i++) draw_ghost(&game->ghosts[1][i]);
@@ -233,8 +233,8 @@ void game_render(PacmanGame *game)
 			draw_board(&game->board);
 			break;
 		case ReviveState2:
-			draw_pacman_static(&game->pacman[1]);// #8 Kim : 1.
-			draw_pacman_static(&game->pacman[0]);
+			draw_pacman_static(&game->pacman[1],1);// #8 Kim : 1.
+			draw_pacman_static(&game->pacman[0],0);
 			for (int i = 0; i < ghost_number(game->currentLevel); i++) draw_ghost(&game->ghosts[0][i]);
 			if(game->playMode==Multi_TA)
 				for(int i=0;i<ghost_number(game->currentLevel);i++) draw_ghost(&game->ghosts[1][i]);
@@ -257,10 +257,10 @@ void game_render(PacmanGame *game)
 				if (game->gameObject[0][i].objectMode == Displaying_obj) draw_object_game(game->currentLevel, &game->gameObject[0][i]);
 			}
 			// #8 Kim : 1.
-			draw_pacman(&game->pacman[0]);
+			draw_pacman(&game->pacman[0],0);
 			// #8 Kim : 2.
 			if(game->playMode!=Single)// #13 Kim : 1. play Mode 에 따라서 추가
-				draw_pacman(&game->pacman[1]);
+				draw_pacman(&game->pacman[1],1);
 
 
 			if(game->pacman[0].godMode == false) {
@@ -334,7 +334,7 @@ void game_render(PacmanGame *game)
 			break;
 		case WinState:
 
-			draw_pacman_static(&game->pacman[0]);
+			draw_pacman_static(&game->pacman[0],0);
 			if(game->playMode!=Single) game->gameState=GameoverState;
 			else{
 			if (dt < 2000)
@@ -357,9 +357,9 @@ void game_render(PacmanGame *game)
 			{
 				//draw everything normally
 				//TODO: this actually draws the last frame pacman was on when he died
-				draw_pacman_static(&game->pacman[0]);
+				draw_pacman_static(&game->pacman[0],0);
 				if (game->playMode!=Single)// #14
-					draw_pacman_static(&game->pacman[1]);
+					draw_pacman_static(&game->pacman[1],1);
 				for (int i = 0; i < ghost_number(game->currentLevel); i++) draw_ghost(&game->ghosts[0][i]);
 				if(game->playMode==Multi_TA)
 					for(int i=0;i<ghost_number(game->currentLevel);i++) draw_ghost(&game->ghosts[1][i]);
@@ -367,9 +367,9 @@ void game_render(PacmanGame *game)
 			else
 			{
 				//draw the death animation
-				draw_pacman_death(&game->pacman[0], dt - 500);
+				draw_pacman_death(&game->pacman[0], dt - 500,0);
 				if(game->playMode!=Single)//#14
-					draw_pacman_static(&game->pacman[1]);
+					draw_pacman_static(&game->pacman[1],1);
 			}
 			//#14 Kim : 2. 이 부분에서 ~ pac맨 그려준다요 그래서 부딪히고 죽는 모션에서 다른 플레이어도 출력하게끔 했음
 			draw_large_pellets(&game->pelletHolder, true);
@@ -381,8 +381,8 @@ void game_render(PacmanGame *game)
 			{
 				//draw everything normally
 				//TODO: this actually draws the last frame pacman was on when he died
-				draw_pacman_static(&game->pacman[1]);
-				draw_pacman_static(&game->pacman[0]);
+				draw_pacman_static(&game->pacman[1],1);
+				draw_pacman_static(&game->pacman[0],0);
 				for (int i = 0; i < 4; i++) draw_ghost(&game->ghosts[0][i]);
 				if(game->playMode==Multi_TA)
 					for(int i=0;i<ghost_number(game->currentLevel);i++) draw_ghost(&game->ghosts[1][i]);
@@ -390,8 +390,8 @@ void game_render(PacmanGame *game)
 			else
 			{	//#14 Kim : 2. 이 부분에서 ~ pac맨 그려준다요 그래서 부딪히고 죽는 모션에서 다른 플레이어도 출력하게끔 했음
 				//draw the death animation
-				draw_pacman_death(&game->pacman[1], dt - 500);
-				draw_pacman_static(&game->pacman[0]);
+				draw_pacman_death(&game->pacman[1], dt - 500,1);
+				draw_pacman_static(&game->pacman[0],0);
 			}
 			draw_large_pellets(&game->pelletHolder, true);
 			draw_board(&game->board);
