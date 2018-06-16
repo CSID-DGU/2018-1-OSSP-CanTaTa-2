@@ -101,4 +101,4 @@ sudo apt-get install libsdl-image1.2 libsdl-gfx1.2-5 libsdl1.2-dev
 
 ## License
 
-This project is licensed under the MIT License - see the [pacman/LICENSE.md](pacman/LICENSE.md) file for details
+This project is licensed under the MIT License - see the [pacman/LICENSE.md](/pacman/LICENSE) file for details
