@@ -184,7 +184,8 @@ void game_render(PacmanGame *game)
 	if(game->playMode==Multi_TA) draw_common_twoup(true, game->pacman[1].score,0);//#37 Yang: 2P UI 추가 - 점수 나오도록
 	else if(game->playMode!=Single)draw_common_twoup(true,game->pacman[1].score,1);
 	if(game->playMode!=Multi_TA)draw_common_highscore(game->highscore);
-	if(game->playMode==Multi_TA) draw_game_time((game->time-ticks_game()+game->get_ticks)/1000);
+	if(game->playMode==Multi_TA&&(game->time-ticks_game()+game->get_ticks)/1000>0) draw_game_time((game->time-ticks_game()+game->get_ticks)/1000);
+	//if(game->playMode==Multi_TA&&(game->time-ticks_game()+game->get_ticks)/1000<=0) draw_game_time(0);
 	//#37 Yang :2P UI 추가 생명 나오도
 	if(game->playMode==Multi_TA) draw_pacman_lives(game->pacman[0].livesLeft,game->pacman[1].livesLeft,0);
 	else if(game->playMode!=Single)draw_pacman_lives(game->pacman[0].livesLeft,game->pacman[1].livesLeft,1);
@@ -967,6 +968,7 @@ static bool check_pacghost_collision(PacmanGame *game , int player_num)	//#14 Ki
 
 void gamestart_init(PacmanGame *game)
 {
+	game->currentLevel = 1;
 	level_init(game);
 
 	pacman_init(&game->pacman[0],0);
@@ -977,7 +979,7 @@ void gamestart_init(PacmanGame *game)
 	//we need to reset all fruit
 	//fuit_init();
 	game->highscore = 0; //TODO maybe load this in from a file..?
-	game->currentLevel = 1;
+
 
 	//invalidate the state so it doesn't effect the enter_state function
 	game->gameState = -1;
